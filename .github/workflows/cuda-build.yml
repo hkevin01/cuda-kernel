@@ -1,0 +1,190 @@
+name: CUDA Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        cuda-version: ['11.8', '12.0', '12.2']
+        build-type: ['Release', 'Debug']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup CUDA
+      uses: Jimver/cuda-toolkit@v0.2.11
+      with:
+        cuda: ${{ matrix.cuda-version }}
+        method: 'network'
+        sub-packages: '["nvcc", "cudart", "cublas", "curand"]'
+    
+    - name: Install CMake
+      uses: jwlawson/actions-setup-cmake@v1.14
+      with:
+        cmake-version: '3.20'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+    
+    - name: Cache build directory
+      uses: actions/cache@v3
+      with:
+        path: build
+        key: ${{ runner.os }}-cuda${{ matrix.cuda-version }}-${{ matrix.build-type }}-${{ hashFiles('CMakeLists.txt', 'src/**/*.cu', 'src/**/*.cpp', 'src/**/*.h') }}
+        restore-keys: |
+          ${{ runner.os }}-cuda${{ matrix.cuda-version }}-${{ matrix.build-type }}-
+    
+    - name: Configure CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+              -DCMAKE_CUDA_ARCHITECTURES="75;80" \
+              ..
+    
+    - name: Build
+      run: |
+        cd build
+        make -j$(nproc)
+    
+    - name: List built executables
+      run: |
+        echo "Built executables:"
+        ls -la build/bin/
+    
+    - name: Test Vector Addition
+      run: |
+        cd build
+        timeout 300 ./bin/vector_addition
+    
+    - name: Test Matrix Multiplication
+      run: |
+        cd build
+        timeout 300 ./bin/matrix_multiplication
+    
+    - name: Upload build artifacts
+      if: matrix.build-type == 'Release' && matrix.cuda-version == '12.2'
+      uses: actions/upload-artifact@v3
+      with:
+        name: cuda-kernels-binaries
+        path: build/bin/
+    
+    - name: Performance benchmark
+      if: matrix.build-type == 'Release'
+      run: |
+        cd build
+        echo "Running performance benchmarks..."
+        echo "=== Vector Addition ===" >> benchmark_results.txt
+        timeout 300 ./bin/vector_addition >> benchmark_results.txt 2>&1 || echo "Vector addition test failed"
+        echo "=== Matrix Multiplication ===" >> benchmark_results.txt
+        timeout 300 ./bin/matrix_multiplication >> benchmark_results.txt 2>&1 || echo "Matrix multiplication test failed"
+    
+    - name: Upload benchmark results
+      if: matrix.build-type == 'Release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results-cuda${{ matrix.cuda-version }}
+        path: build/benchmark_results.txt
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup CUDA
+      uses: Jimver/cuda-toolkit@v0.2.11
+      with:
+        cuda: '12.2'
+        method: 'network'
+        sub-packages: '["nvcc"]'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format cppcheck
+    
+    - name: Check code formatting
+      run: |
+        find src -name "*.cpp" -o -name "*.h" -o -name "*.cu" -o -name "*.cuh" | \
+        xargs clang-format --dry-run --Werror
+    
+    - name: Static analysis
+      run: |
+        # Run cppcheck on C++ files
+        find src -name "*.cpp" -o -name "*.h" | \
+        xargs cppcheck --enable=warning,style,performance --error-exitcode=1 --suppress=missingIncludeSystem
+    
+    - name: Check for CUDA best practices
+      run: |
+        echo "Checking for common CUDA anti-patterns..."
+        
+        # Check for synchronous memory copies
+        if grep -r "cudaMemcpy[^A]" src/; then
+          echo "Warning: Found synchronous cudaMemcpy calls. Consider using cudaMemcpyAsync."
+        fi
+        
+        # Check for missing error checking
+        if grep -rL "CUDA_CHECK\|cudaGetLastError\|cudaDeviceSynchronize" src/ | grep -E "\.(cu|cpp)$"; then
+          echo "Warning: Found CUDA files without apparent error checking."
+        fi
+        
+        echo "CUDA best practices check completed."
+
+  documentation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check documentation
+      run: |
+        # Check if README exists and has content
+        if [ ! -f README.md ] || [ ! -s README.md ]; then
+          echo "Error: README.md is missing or empty"
+          exit 1
+        fi
+        
+        # Check if all examples have documentation
+        for dir in src/*/; do
+          example_name=$(basename "$dir")
+          if [ ! -f "${dir}README.md" ]; then
+            echo "Warning: No README.md found for $example_name"
+          fi
+        done
+        
+        echo "Documentation check completed."
+    
+    - name: Generate documentation
+      run: |
+        echo "# CUDA Kernel Examples Documentation" > docs/README.md
+        echo "" >> docs/README.md
+        echo "Generated on: $(date)" >> docs/README.md
+        echo "" >> docs/README.md
+        
+        for dir in src/*/; do
+          example_name=$(basename "$dir")
+          echo "## $example_name" >> docs/README.md
+          echo "" >> docs/README.md
+          
+          # Extract brief description from main.cpp if available
+          if [ -f "${dir}main.cpp" ]; then
+            grep -A 5 "===" "${dir}main.cpp" | head -3 >> docs/README.md || true
+          fi
+          echo "" >> docs/README.md
+        done
+    
+    - name: Upload documentation
+      uses: actions/upload-artifact@v3
+      with:
+        name: generated-docs
+        path: docs/

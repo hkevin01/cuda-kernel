@@ -1,0 +1,121 @@
+# CUDA Kernel Project .gitignore
+
+# Build directories
+build/
+bin/
+obj/
+output/
+dist/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# CUDA object files
+*.o
+*.obj
+*.cu.o
+*.cu.obj
+*.ptx
+*.cubin
+*.fatbin
+
+# Executables
+*.exe
+*.out
+a.out
+
+# Library files
+*.lib
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# Debug files
+*.pdb
+*.ilk
+
+# Visual Studio files
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.suo
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.tmp
+*.log
+
+# Nsight files
+*.nsight-cuprof-report
+*.nsight-cuprof-db
+*.nsight-cuproj
+*.nsight-cuprof
+*.nvprof
+*.nvvp
+
+# Profiling files
+profile_*.txt
+*.prof
+
+# Temporary files
+*.tmp
+*.temp
+*~
+.#*
+#*#
+
+# IDE files
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Documentation build
+docs/_build/
+docs/build/
+
+# Coverage reports
+*.gcov
+*.gcda
+*.gcno
+
+# Test outputs
+test_output/
+*.test
+
+# Package files
+*.tar.gz
+*.zip
+*.rar
+
+# Backup files
+*.bak
+*.backup
