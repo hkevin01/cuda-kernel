@@ -1,16 +1,22 @@
-# CUDA Kernel Programming Examples
+# GPU Kernel Programming Examples (CUDA + ROCm)
 
-A comprehensive collection of CUDA kernel examples demonstrating essential parallel computing techniques for modern GPU programming. This project focuses on the most in-demand CUDA programming skills required in industry today.
+A comprehensive collection of GPU kernel examples demonstrating essential parallel computing techniques for modern GPU programming. This project supports both NVIDIA CUDA and AMD ROCm platforms, focusing on the most in-demand GPU programming skills required in industry today.
 
 ## 🎯 Project Overview
 
-This repository contains 5 carefully selected CUDA kernel examples that represent the core skills needed for CUDA development jobs in 2025:
+This repository contains 5 carefully selected GPU kernel examples that represent the core skills needed for GPU development jobs in 2025, supporting both NVIDIA and AMD hardware:
 
 1. **Vector Addition** - Foundation parallel programming
-2. **Matrix Multiplication** - Shared memory optimization
+2. **Matrix Multiplication** - Shared memory optimization  
 3. **Parallel Reduction** - Advanced synchronization and optimization
 4. **2D Convolution** - Image processing and compute kernels
 5. **Monte Carlo Simulation** - Random number generation and statistical computing
+
+## 🖥️ Platform Support
+
+- **NVIDIA GPUs**: CUDA toolkit (11.0+)
+- **AMD GPUs**: ROCm platform (5.0+)
+- **Cross-platform**: HIP (Heterogeneous Interface for Portability)
 
 ## 📁 Project Structure
 
@@ -41,28 +47,74 @@ cuda-kernel/
 
 ### Prerequisites
 
-- **CUDA Toolkit** 12.0 or later
+#### Hardware Requirements
+- **NVIDIA GPU**: GTX 10-series or newer (compute capability 6.0+)
+- **AMD GPU**: RX 6000/7000 series, Vega, or MI-series
+- **Memory**: 4GB+ GPU memory recommended
+
+#### Software Requirements
+
+**For NVIDIA GPUs (CUDA)**
+- **CUDA Toolkit** 11.0 or later
 - **CMake** 3.20 or later
 - **C++ Compiler** with C++17 support
-- **NVIDIA GPU** with compute capability 3.5+
+
+**For AMD GPUs (ROCm)**
+- **ROCm** 5.0 or later
+- **HIP** development tools
+- **CMake** 3.20 or later
+- **C++ Compiler** with C++17 support
 
 ### Quick Start
 
+#### Automatic Setup (Recommended)
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd cuda-kernel
 
-# Build all examples
+# Run the automated setup script
+./scripts/setup_gpu_platform.sh
+```
+
+The setup script will:
+- Detect your GPU hardware (NVIDIA or AMD)
+- Check for required software (CUDA or ROCm)
+- Offer to install missing components
+- Build the project with appropriate platform support
+
+#### Manual Setup
+
+**For NVIDIA GPUs (CUDA)**
+```bash
+# Install CUDA Toolkit 11.0+
+# See docs/installation/cuda-setup.md for detailed instructions
+
+# Build with CUDA
 mkdir build && cd build
-cmake ..
+cmake -DUSE_CUDA=ON ..
 make -j$(nproc)
+```
 
-# Run vector addition example
-./bin/vector_addition
+**For AMD GPUs (ROCm)**
+```bash
+# Install ROCm 5.0+
+# See docs/installation/rocm-setup.md for detailed instructions
 
-# Run with profiling
-nvprof ./bin/matrix_multiplication
+# Build with ROCm/HIP
+mkdir build && cd build
+cmake -DUSE_HIP=ON ..
+make -j$(nproc)
+```
+
+#### Run Examples
+```bash
+# From build directory
+./01_vector_addition
+./02_matrix_multiplication
+./03_parallel_reduction
+./04_convolution_2d
+./05_monte_carlo
 ```
 
 ## 📋 Examples Overview

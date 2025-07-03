@@ -1,7 +1,9 @@
-# CUDA Kernel Project .gitignore
+# GPU Kernel Project .gitignore
 
 # Build directories
 build/
+build_hip/
+build_cuda/
 bin/
 obj/
 output/
@@ -19,10 +21,20 @@ cmake_install.cmake
 *.cubin
 *.fatbin
 
+# HIP/ROCm object files
+*.hip.o
+*.hip.obj
+*.hsaco
+*.hcc.o
+*.rocm-*
+
 # Executables
 *.exe
 *.out
 a.out
+*_hip
+*_cuda
+test_*
 
 # Library files
 *.lib
@@ -64,6 +76,9 @@ a.out
 # Profiling files
 profile_*.txt
 *.prof
+*.rocprof
+*.rocm-trace
+gmon.out
 
 # Temporary files
 *.tmp
@@ -119,3 +134,19 @@ test_output/
 # Backup files
 *.bak
 *.backup
+
+# ROCm/HIP specific files
+.hipInfo
+.hip_version
+*.hip_debug
+
+# AMD GPU profiling
+*.atp
+*.csv
+rocprof_*
+roctx_*
+
+# Build artifacts
+test_hip/
+test_cuda/
+benchmarks/
