@@ -35,43 +35,55 @@ HIP_FLAGS="-O3 -std=c++14 -I$PROJECT_ROOT/src/common"
 
 echo -e "\n${YELLOW}Building examples...${NC}"
 
-# 1. Vector Addition
-echo -e "${GREEN}Building Vector Addition...${NC}"
-cd "$PROJECT_ROOT/src/01_vector_addition"
+echo -e "\n${YELLOW}Building examples...${NC}"
 
-if [ -f "main_hip.cpp" ]; then
-    # Build with hipcc - compile all sources together to avoid linking issues
-    hipcc $HIP_FLAGS \
-          -o "$BUILD_DIR/vector_addition_hip" \
-          main_hip.cpp \
-          "$PROJECT_ROOT/src/common/timer.cpp" \
-          "$PROJECT_ROOT/src/common/helper_functions.cpp" \
-          "$PROJECT_ROOT/src/common/hip_utils.cpp"
+# Advanced examples that require more complex compilation
+EXAMPLES=(
+    "01_vector_addition"
+    "07_advanced_threading" 
+    "08_dynamic_memory"
+    "09_warp_primitives"
+)
+
+for example in "${EXAMPLES[@]}"; do
+    echo -e "${GREEN}Building $example...${NC}"
+    cd "$PROJECT_ROOT/src/$example"
     
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✓ Vector Addition built successfully${NC}"
+    if [ -f "main_hip.cpp" ]; then
+        # Build with hipcc - compile all sources together to avoid linking issues
+        hipcc $HIP_FLAGS \
+              -o "$BUILD_DIR/${example}_hip" \
+              main_hip.cpp \
+              "$PROJECT_ROOT/src/common/timer.cpp" \
+              "$PROJECT_ROOT/src/common/helper_functions.cpp" \
+              "$PROJECT_ROOT/src/common/hip_utils.cpp"
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ $example built successfully${NC}"
+        else
+            echo -e "${RED}✗ $example build failed${NC}"
+            exit 1
+        fi
     else
-        echo -e "${RED}✗ Vector Addition build failed${NC}"
-        exit 1
+        echo -e "${YELLOW}⚠ main_hip.cpp not found in $example, skipping...${NC}"
     fi
-else
-    echo -e "${YELLOW}⚠ main_hip.cpp not found, skipping Vector Addition${NC}"
-fi
-
-cd "$PROJECT_ROOT"
+    
+    cd "$PROJECT_ROOT"
+done
 
 # Test if the build worked
-if [ -f "$BUILD_DIR/vector_addition_hip" ]; then
+if [ -f "$BUILD_DIR/01_vector_addition_hip" ]; then
     echo -e "\n${GREEN}Build completed successfully!${NC}"
     echo ""
     echo "Available executables:"
     ls -la "$BUILD_DIR"/*_hip 2>/dev/null || echo "No executables found"
     echo ""
-    echo "To run the vector addition example:"
-    echo "  ./$BUILD_DIR/vector_addition_hip"
+    echo "Examples to run:"
+    echo "  Vector Addition:        ./$BUILD_DIR/01_vector_addition_hip [vector_size]"
+    echo "  Advanced Threading:     ./$BUILD_DIR/07_advanced_threading_hip [data_size] [volume_size]"
+    echo "  Dynamic Memory:         ./$BUILD_DIR/08_dynamic_memory_hip [nodes] [matrix_size]"
+    echo "  Warp Primitives:        ./$BUILD_DIR/09_warp_primitives_hip [matrix_size] [array_size]"
     echo ""
-    echo "To run with custom vector size (e.g., 1M elements):"
-    echo "  ./$BUILD_DIR/vector_addition_hip 1048576"
 else
     echo -e "\n${RED}Build failed!${NC}"
     exit 1

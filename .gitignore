@@ -150,3 +150,14 @@ roctx_*
 test_hip/
 test_cuda/
 benchmarks/
+
+# Advanced GPU examples
+*_simplified.cpp
+*_simplified.hip
+*_advanced
+*_complex
+
+# Large test files
+test_data/
+benchmark_results/
+performance_logs/
