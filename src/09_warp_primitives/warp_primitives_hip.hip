@@ -396,3 +396,254 @@ __global__ void warpPrefixSum(
     output_int[tid] = i_prefix;
     output_combined[tid] = combined;
 }
+
+// Advanced warp-level convolution with shared memory optimization
+__global__ void warpOptimizedConvolution(
+    const float* __restrict__ input,
+    const float* __restrict__ filter,
+    float* __restrict__ output,
+    int width, int height, int filter_size
+) {
+    __shared__ float shared_input[34][34]; // 32x32 tile + 2-pixel halo for 3x3 filter
+    
+    auto warp = cg::tiled_partition<32>(cg::this_thread_block());
+    int warp_id = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
+    int lane_id = warp.thread_rank();
+    
+    // Calculate tile coordinates
+    int tile_x = (warp_id % ((width + 31) / 32)) * 32;
+    int tile_y = (warp_id / ((width + 31) / 32)) * 32;
+    
+    int radius = filter_size / 2;
+    
+    // Collaborative loading with halo
+    for (int dy = 0; dy < 34; dy += 1) {
+        for (int dx = lane_id; dx < 34; dx += 32) {
+            int src_x = tile_x + dx - radius;
+            int src_y = tile_y + dy - radius;
+            
+            if (src_x >= 0 && src_x < width && src_y >= 0 && src_y < height) {
+                shared_input[dy][dx] = input[src_y * width + src_x];
+            } else {
+                shared_input[dy][dx] = 0.0f;
+            }
+        }
+    }
+    
+    __syncwarp();
+    
+    // Process convolution using warp cooperation
+    for (int local_y = 0; local_y < 32; local_y++) {
+        int global_x = tile_x + lane_id;
+        int global_y = tile_y + local_y;
+        
+        if (global_x < width && global_y < height) {
+            float result = 0.0f;
+            
+            // Convolution computation with warp-level optimization
+            for (int fy = 0; fy < filter_size; fy++) {
+                for (int fx = 0; fx < filter_size; fx++) {
+                    int local_x = lane_id + radius;
+                    int local_sy = local_y + radius;
+                    
+                    float input_val = shared_input[local_sy + fy - radius][local_x + fx - radius];
+                    float filter_val = filter[fy * filter_size + fx];
+                    
+                    result += input_val * filter_val;
+                }
+            }
+            
+            // Warp-level result sharing and processing
+            float warp_max = cg::reduce(warp, fabsf(result), cg::greater<float>());
+            if (warp_max > 0.0f) {
+                result = result / warp_max; // Normalize by warp max
+            }
+            
+            output[global_y * width + global_x] = result;
+        }
+    }
+}
+
+// Multi-warp cooperative matrix multiplication with advanced tiling
+__global__ void multiWarpMatrixMul(
+    const float* __restrict__ A,
+    const float* __restrict__ B,
+    float* __restrict__ C,
+    int M, int N, int K
+) {
+    __shared__ float shared_A[128][32]; // 4 warps worth of A data
+    __shared__ float shared_B[32][128]; // 4 warps worth of B data
+    
+    auto block = cg::this_thread_block();
+    auto warp = cg::tiled_partition<32>(block);
+    
+    int warp_id = threadIdx.x / 32;
+    int lane_id = warp.thread_rank();
+    
+    // Multi-warp tile coordinates
+    int block_row = blockIdx.y * 128;
+    int block_col = blockIdx.x * 128;
+    
+    // Each warp handles a 32x32 subtile
+    int warp_row = block_row + (warp_id / 4) * 32;
+    int warp_col = block_col + (warp_id % 4) * 32;
+    
+    float c_reg[4] = {0.0f}; // Register tiling
+    
+    // Main computation loop
+    for (int k_tile = 0; k_tile < K; k_tile += 32) {
+        // Cooperative loading of A and B tiles
+        // Each warp loads its portion
+        for (int i = 0; i < 4; i++) {
+            int row = warp_row + i * 8 + (lane_id / 4);
+            int col = k_tile + (lane_id % 4) * 8;
+            
+            if (row < M && col < K) {
+                shared_A[warp_id * 32 + i * 8 + (lane_id / 4)][lane_id % 4] = A[row * K + col];
+            }
+        }
+        
+        for (int i = 0; i < 4; i++) {
+            int row = k_tile + i * 8 + (lane_id / 4);
+            int col = warp_col + (lane_id % 4) * 8;
+            
+            if (row < K && col < N) {
+                shared_B[i * 8 + (lane_id / 4)][warp_id * 32 + (lane_id % 4)] = B[row * N + col];
+            }
+        }
+        
+        block.sync();
+        
+        // Warp-level computation with advanced scheduling
+        for (int k = 0; k < 32; k++) {
+            // Load A and B values with warp shuffle optimization
+            float a_val = shared_A[warp_id * 32 + (lane_id / 8)][k];
+            float b_vals[4];
+            
+            for (int j = 0; j < 4; j++) {
+                b_vals[j] = shared_B[k][warp_id * 32 + j * 8 + (lane_id % 8)];
+            }
+            
+            // Compute partial products with warp-level communication
+            for (int j = 0; j < 4; j++) {
+                float prod = a_val * b_vals[j];
+                
+                // Advanced warp reduction pattern
+                prod = warp.shfl_xor(prod, 16);
+                prod = warp.shfl_xor(prod, 8);
+                prod = warp.shfl_xor(prod, 4);
+                
+                c_reg[j] += prod;
+            }
+        }
+        
+        block.sync();
+    }
+    
+    // Write results back with warp cooperation
+    for (int i = 0; i < 4; i++) {
+        int row = warp_row + (lane_id / 8);
+        int col = warp_col + i * 8 + (lane_id % 8);
+        
+        if (row < M && col < N) {
+            C[row * N + col] = c_reg[i];
+        }
+    }
+}
+
+// Advanced warp-level pattern matching and string processing
+__global__ void warpStringProcessing(
+    const char* __restrict__ text,
+    const char* __restrict__ pattern,
+    int* __restrict__ matches,
+    int text_length,
+    int pattern_length
+) {
+    auto warp = cg::tiled_partition<32>(cg::this_thread_block());
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int lane_id = warp.thread_rank();
+    
+    // Each warp processes 32 positions in parallel
+    int base_pos = (tid / 32) * 32;
+    int pos = base_pos + lane_id;
+    
+    if (pos + pattern_length > text_length) return;
+    
+    // Collaborative pattern matching
+    bool match = true;
+    
+    // Load pattern collaboratively
+    char pattern_chars[32];
+    for (int i = lane_id; i < pattern_length; i += 32) {
+        pattern_chars[i] = pattern[i];
+    }
+    
+    // Warp-level string comparison
+    for (int i = 0; i < pattern_length; i++) {
+        char text_char = text[pos + i];
+        char pattern_char = warp.shfl(pattern_chars[i % 32], i / 32);
+        
+        if (text_char != pattern_char) {
+            match = false;
+            break;
+        }
+    }
+    
+    // Warp-level match aggregation
+    unsigned match_mask = warp.ballot(match);
+    int match_count = __popc(match_mask);
+    
+    // Store results
+    if (lane_id == 0) {
+        for (int i = 0; i < 32; i++) {
+            if ((match_mask >> i) & 1) {
+                atomicAdd(&matches[0], 1);
+            }
+        }
+    }
+}
+
+// Advanced warp-level graph traversal (BFS on adjacency matrix)
+__global__ void warpGraphTraversal(
+    const int* __restrict__ adjacency_matrix,
+    int* __restrict__ visited,
+    int* __restrict__ distance,
+    int* __restrict__ queue,
+    int* queue_size,
+    int num_vertices,
+    int current_level
+) {
+    auto warp = cg::tiled_partition<32>(cg::this_thread_block());
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int lane_id = warp.thread_rank();
+    
+    // Each warp processes vertices at current level
+    int warp_id = tid / 32;
+    int vertices_per_warp = (num_vertices + 31) / 32;
+    
+    int start_vertex = warp_id * vertices_per_warp;
+    int end_vertex = min(start_vertex + vertices_per_warp, num_vertices);
+    
+    // Process vertices in current level
+    for (int v = start_vertex + lane_id; v < end_vertex; v += 32) {
+        if (v < num_vertices && distance[v] == current_level) {
+            // Explore neighbors
+            for (int neighbor = 0; neighbor < num_vertices; neighbor++) {
+                if (adjacency_matrix[v * num_vertices + neighbor] && 
+                    atomicCAS(&visited[neighbor], 0, 1) == 0) {
+                    
+                    distance[neighbor] = current_level + 1;
+                    
+                    // Add to next level queue using warp cooperation
+                    int queue_pos = atomicAdd(queue_size, 1);
+                    if (queue_pos < num_vertices) {
+                        queue[queue_pos] = neighbor;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Warp-level synchronization for queue management
+    __syncwarp();
+}
