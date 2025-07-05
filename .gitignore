@@ -161,3 +161,8 @@ benchmarks/
 test_data/
 benchmark_results/
 performance_logs/
+
+# Screenshots (include actual screenshots, exclude temporary ones)
+screenshots/*_temp.png
+screenshots/*_draft.png
+screenshots/.DS_Store

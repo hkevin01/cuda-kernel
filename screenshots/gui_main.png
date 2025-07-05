@@ -1,0 +1,24 @@
+# This would be the actual screenshot file
+# The image shows the GPU Kernel Examples - HIP application with:
+# - Main window titled "GPU Kernel Examples - HIP"
+# - Menu bar with File, Edit, View, Help
+# - Toolbar with New, Open, Save, Cut, Copy, Paste, Run Kernel, Run Tests, Performance buttons
+# - Tab bar with: Kernel Runner, Examples, Results, Performance, Tests
+# - Left panel showing "Available Kernels" list including:
+#   - [Basic] Vector Addition (selected)
+#   - [Basic] Matrix Multiplication
+#   - [Basic] Parallel Reduction
+#   - [Basic] 2D Convolution
+#   - [Basic] Monte Carlo
+#   - [Advanced] Advanced FFT
+#   - [Advanced] Advanced Threading
+#   - [Advanced] Dynamic Memory
+#   - [Advanced] Warp Primitives
+#   - [Advanced] 3D FFT
+#   - [Advanced] N-Body Simulation
+# - Right panel showing "Kernel Information" for Vector Addition with:
+#   - Description: "Simple vector addition kernel demonstrating basic GPU operations"
+#   - Parameters section with iterations, data size, and platform options
+#   - Configuration section with Iterations: 10, Data Size: 10000 elements, Platform: HIP
+# - Bottom panel showing "Output" section
+# - Status bar showing "Ready" and "Platform: HIP"

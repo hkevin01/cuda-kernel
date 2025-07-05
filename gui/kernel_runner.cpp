@@ -309,7 +309,8 @@ QString KernelRunner::getKernelExecutable(const QString &kernelName)
     executableMap["N-Body Simulation"] = "11_nbody_simulation_hip";
 
     QString executableName = executableMap.value(kernelName);
-    if (executableName.isEmpty()) {
+    if (executableName.isEmpty())
+    {
         return QString();
     }
 
@@ -318,13 +319,14 @@ QString KernelRunner::getKernelExecutable(const QString &kernelName)
         QApplication::applicationDirPath() + "/../build_hip",
         QApplication::applicationDirPath() + "/build_hip",
         QApplication::applicationDirPath() + "/../build",
-        QApplication::applicationDirPath() + "/build"
-    };
+        QApplication::applicationDirPath() + "/build"};
 
-    for (const QString &buildDir : buildDirs) {
+    for (const QString &buildDir : buildDirs)
+    {
         QString executable = QString("%1/%2").arg(buildDir, executableName);
         QFileInfo fileInfo(executable);
-        if (fileInfo.exists() && fileInfo.isExecutable()) {
+        if (fileInfo.exists() && fileInfo.isExecutable())
+        {
             return executable;
         }
     }
