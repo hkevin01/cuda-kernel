@@ -1,3 +1,4 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include "hip_utils.h"
 #include "timer.h"
@@ -8,24 +9,17 @@
 #include <algorithm>
 #include <random>
 
-// Kernel declarations
+// Kernel declarations - forward declarations for kernels defined in .hip files
 extern "C"
 {
-    __global__ void advancedTensorOperations(const float *A, const float *B, float *C,
-                                             int M, int N, int K, float alpha, float beta);
-    __global__ void warpPrimitivesShowcase(const int *input, int *output, int *warp_results, int n);
-    __global__ void multiLevelReduction(const float *input, float *output, int n, int reduction_type);
-    __global__ void warpMatrixTranspose(const float *input, float *output, int rows, int cols);
-    __global__ void warpBitonicSort(int *data, int n);
-    __global__ void warpPrefixSum(const float *input_float, const int *input_int,
-                                  float *output_float, int *output_int, long long *output_combined, int n);
-    __global__ void warpOptimizedConvolution(const float *input, const float *filter, float *output,
-                                            int width, int height, int filter_size);
-    __global__ void multiWarpMatrixMul(const float *A, const float *B, float *C, int M, int N, int K);
-    __global__ void warpStringProcessing(const char *text, const char *pattern, int *matches,
-                                        int text_length, int pattern_length);
-    __global__ void warpGraphTraversal(const int *adjacency_matrix, int *visited, int *distance,
-                                      int *queue, int *queue_size, int num_vertices, int current_level);
+    void launchAdvancedTensorOperations(float *A, float *B, float *C, int M, int N, int K, float alpha, float beta, int blockSize, int gridSize);
+    void launchWarpPrimitivesShowcase(int *input, int *output, int *warp_results, int n, int blockSize, int gridSize);
+    void launchMultiLevelReduction(float *input, float *output, int n, int type, int blockSize, int gridSize);
+    void launchWarpMatrixTranspose(float *input, float *output, int rows, int cols, int blockSize, int gridSize);
+    void launchWarpBitonicSort(int *data, int n, int blockSize, int gridSize);
+    void launchWarpPrefixSum(float *input_float, int *input_int, float *output_float, int *output_int, long long *output_combined, int n, int blockSize, int gridSize);
+    void launchWarpOptimizedConvolution(float *input, float *filter, float *output, int width, int height, int filter_size, int blockSize, int gridSize);
+    void launchMultiWarpMatrixMul(float *A, float *B, float *C, int M, int N, int K, int blockSize, int gridSize);
 }
 
 class WarpPrimitivesBenchmark
@@ -73,8 +67,7 @@ public:
 
         for (int i = 0; i < iterations; i++)
         {
-            hipLaunchKernelGGL(advancedTensorOperations, gridSize, blockSize, 0, 0,
-                               d_A, d_B, d_C, M, N, K, alpha, beta);
+            launchAdvancedTensorOperations(d_A, d_B, d_C, M, N, K, alpha, beta, blockSize.x, gridSize.x);
         }
 
         HIP_CHECK(hipEventRecord(stop));
@@ -139,8 +132,7 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        hipLaunchKernelGGL(warpPrimitivesShowcase, dim3(gridSize), dim3(blockSize), 0, 0,
-                           d_input, d_output, d_warp_results, n);
+        launchWarpPrimitivesShowcase(d_input, d_output, d_warp_results, n, blockSize, gridSize);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -218,8 +210,7 @@ public:
             HIP_CHECK(hipEventCreate(&stop));
 
             HIP_CHECK(hipEventRecord(start));
-            hipLaunchKernelGGL(multiLevelReduction, dim3(num_blocks), dim3(1024), 0, 0,
-                               d_input, d_output, n, type);
+            launchMultiLevelReduction(d_input, d_output, n, type, 1024, num_blocks);
             HIP_CHECK(hipEventRecord(stop));
             HIP_CHECK(hipEventSynchronize(stop));
 
@@ -293,8 +284,7 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        hipLaunchKernelGGL(warpMatrixTranspose, dim3(gridSize), dim3(blockSize), 0, 0,
-                           d_input, d_output, rows, cols);
+        launchWarpMatrixTranspose(d_input, d_output, rows, cols, blockSize, gridSize);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -361,7 +351,7 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        hipLaunchKernelGGL(warpBitonicSort, dim3(gridSize), dim3(blockSize), 0, 0, d_data, n);
+        launchWarpBitonicSort(d_data, n, blockSize, gridSize);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -411,8 +401,9 @@ public:
         // Initialize data
         std::vector<float> h_input_float(n);
         std::vector<int> h_input_int(n);
-        
-        for (int i = 0; i < n; i++) {
+
+        for (int i = 0; i < n; i++)
+        {
             h_input_float[i] = static_cast<float>(i % 100) / 10.0f;
             h_input_int[i] = i % 50;
         }
@@ -429,8 +420,7 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        hipLaunchKernelGGL(warpPrefixSum, dim3(gridSize), dim3(blockSize), 0, 0,
-                          d_input_float, d_input_int, d_output_float, d_output_int, d_output_combined, n);
+        launchWarpPrefixSum(d_input_float, d_input_int, d_output_float, d_output_int, d_output_combined, n, blockSize, gridSize);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -441,7 +431,7 @@ public:
         std::vector<float> h_output_float(n);
         std::vector<int> h_output_int(n);
         std::vector<long long> h_output_combined(n);
-        
+
         HIP_CHECK(hipMemcpy(h_output_float.data(), d_output_float, n * sizeof(float), hipMemcpyDeviceToHost));
         HIP_CHECK(hipMemcpy(h_output_int.data(), d_output_int, n * sizeof(int), hipMemcpyDeviceToHost));
         HIP_CHECK(hipMemcpy(h_output_combined.data(), d_output_combined, n * sizeof(long long), hipMemcpyDeviceToHost));
@@ -449,9 +439,10 @@ public:
         std::cout << std::fixed << std::setprecision(3);
         std::cout << "GPU time: " << gpu_time << " ms" << std::endl;
         std::cout << "Sample results (first 10):" << std::endl;
-        for (int i = 0; i < std::min(10, n); i++) {
-            std::cout << "  [" << i << "] float: " << h_output_float[i] 
-                      << ", int: " << h_output_int[i] 
+        for (int i = 0; i < std::min(10, n); i++)
+        {
+            std::cout << "  [" << i << "] float: " << h_output_float[i]
+                      << ", int: " << h_output_int[i]
                       << ", combined: " << h_output_combined[i] << std::endl;
         }
 
@@ -470,7 +461,7 @@ public:
         std::cout << "Image size: " << width << "x" << height << std::endl;
 
         const int filter_size = 3;
-        
+
         // Allocate memory
         float *d_input, *d_output, *d_filter;
         HIP_CHECK(hipMalloc(&d_input, width * height * sizeof(float)));
@@ -481,7 +472,8 @@ public:
         std::vector<float> h_input(width * height);
         std::vector<float> h_filter = {-1, -1, -1, -1, 8, -1, -1, -1, -1}; // Edge detection
 
-        for (int i = 0; i < width * height; i++) {
+        for (int i = 0; i < width * height; i++)
+        {
             h_input[i] = sin(i * 0.01f) + cos(i * 0.02f);
         }
 
@@ -498,8 +490,7 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        hipLaunchKernelGGL(warpOptimizedConvolution, dim3(gridSize), dim3(blockSize), 0, 0,
-                          d_input, d_filter, d_output, width, height, filter_size);
+        launchWarpOptimizedConvolution(d_input, d_filter, d_output, width, height, filter_size, blockSize, gridSize);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -538,8 +529,10 @@ public:
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> dis(-1.0f, 1.0f);
 
-        for (int i = 0; i < M * K; i++) h_A[i] = dis(gen);
-        for (int i = 0; i < K * N; i++) h_B[i] = dis(gen);
+        for (int i = 0; i < M * K; i++)
+            h_A[i] = dis(gen);
+        for (int i = 0; i < K * N; i++)
+            h_B[i] = dis(gen);
 
         HIP_CHECK(hipMemcpy(d_A, h_A.data(), M * K * sizeof(float), hipMemcpyHostToDevice));
         HIP_CHECK(hipMemcpy(d_B, h_B.data(), K * N * sizeof(float), hipMemcpyHostToDevice));
@@ -555,12 +548,12 @@ public:
 
         const int iterations = 50;
         HIP_CHECK(hipEventRecord(start));
-        
-        for (int i = 0; i < iterations; i++) {
-            hipLaunchKernelGGL(multiWarpMatrixMul, gridSize, blockSize, 0, 0,
-                              d_A, d_B, d_C, M, N, K);
+
+        for (int i = 0; i < iterations; i++)
+        {
+            launchMultiWarpMatrixMul(d_A, d_B, d_C, M, N, K, blockSize.x, gridSize.x);
         }
-        
+
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 

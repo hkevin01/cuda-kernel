@@ -1,9 +1,13 @@
+#ifdef USE_CUDA
 #include "cuda_utils.h"
 #include "timer.h"
 #include "helper_functions.h"
-#include <iostream>
 #include <curand_kernel.h>
+#endif
+#include <iostream>
 #include <cmath>
+
+// Use gpu_utils.h for platform-agnostic GPU code
 
 // Monte Carlo Pi estimation kernel
 __global__ void monteCarloPiKernel(float *results, int n_samples_per_thread, unsigned long long seed)

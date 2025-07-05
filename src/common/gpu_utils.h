@@ -38,8 +38,9 @@ inline float getGPUTheoreticalBandwidth() { return getHIPTheoreticalBandwidth();
 #elif defined(__CUDACC__) || defined(CUDA_VERSION)
 // NVIDIA CUDA platform
 #define GPU_PLATFORM_CUDA
-#include "cuda_utils.h"
+#ifdef USE_CUDA
 #include <cuda_runtime.h>
+#endif
 
 // Unified API macros for CUDA
 #define GPU_CHECK(call) CUDA_CHECK(call)
@@ -114,5 +115,7 @@ inline void synchronizeGPU()
 {
     GPU_CHECK(gpuDeviceSynchronize());
 }
+
+// Use gpu_utils.h for platform-agnostic GPU code
 
 #endif // GPU_UTILS_H

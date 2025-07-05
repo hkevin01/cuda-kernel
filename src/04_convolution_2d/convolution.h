@@ -1,7 +1,10 @@
 #ifndef CONVOLUTION_H
 #define CONVOLUTION_H
 
+#ifdef USE_CUDA
 #include <cuda_runtime.h>
+#endif
+// Use gpu_utils.h for platform-agnostic GPU code
 
 // Different convolution kernel implementations
 __global__ void convolution_naive(const float *input, const float *kernel,

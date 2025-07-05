@@ -1,3 +1,4 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include "hip_utils.h"
 #include "timer.h"
@@ -5,15 +6,13 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include <cmath>
+#include <random>
 
-// HIP kernel for vector addition
-__global__ void vectorAddHIP(const float *a, const float *b, float *c, int n)
+// External kernel declaration
+extern "C"
 {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n)
-    {
-        c[idx] = a[idx] + b[idx];
-    }
+    void launchVectorAddHIP(const float *a, const float *b, float *c, int n, int blockSize, int gridSize);
 }
 
 // CPU reference implementation
@@ -93,8 +92,8 @@ int main(int argc, char **argv)
     std::cout << "Grid size: " << gridSize << std::endl;
     std::cout << "Total threads: " << gridSize * blockSize << std::endl;
 
-    // Warmup run
-    hipLaunchKernelGGL(vectorAddHIP, dim3(gridSize), dim3(blockSize), 0, 0, d_a, d_b, d_c, n);
+    // Launch kernel
+    launchVectorAddHIP(d_a, d_b, d_c, n, blockSize, gridSize);
     HIP_CHECK(hipDeviceSynchronize());
 
     // Benchmark GPU kernel using HIP events for precise timing
@@ -107,7 +106,7 @@ int main(int argc, char **argv)
     HIP_CHECK(hipEventRecord(start_event, 0));
     for (int i = 0; i < iterations; i++)
     {
-        hipLaunchKernelGGL(vectorAddHIP, dim3(gridSize), dim3(blockSize), 0, 0, d_a, d_b, d_c, n);
+        launchVectorAddHIP(d_a, d_b, d_c, n, blockSize, gridSize);
     }
     HIP_CHECK(hipEventRecord(stop_event, 0));
     HIP_CHECK(hipEventSynchronize(stop_event));

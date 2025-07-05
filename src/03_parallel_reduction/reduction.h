@@ -1,7 +1,10 @@
 #ifndef REDUCTION_H
 #define REDUCTION_H
 
+#ifdef USE_CUDA
 #include <cuda_runtime.h>
+#endif
+// Use gpu_utils.h for platform-agnostic GPU code
 
 // Different reduction kernel implementations for performance comparison
 __global__ void reduce_naive(float *input, float *output, int n);

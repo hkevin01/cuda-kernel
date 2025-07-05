@@ -1,3 +1,4 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 
 // HIP kernel for vector addition
@@ -35,5 +36,20 @@ __global__ void vectorAddHIPVectorized(const float4* a, const float4* b, float4*
         c_vec.w = a_vec.w + b_vec.w;
         
         c[idx] = c_vec;
+    }
+}
+
+// Wrapper functions for launching kernels from C++ files
+extern "C" {
+    void launchVectorAddHIP(const float* a, const float* b, float* c, int n, int blockSize, int gridSize) {
+        vectorAddHIP<<<gridSize, blockSize>>>(a, b, c, n);
+    }
+    
+    void launchVectorAddHIPOptimized(const float* a, const float* b, float* c, int n, int blockSize, int gridSize) {
+        vectorAddHIPOptimized<<<gridSize, blockSize>>>(a, b, c, n);
+    }
+    
+    void launchVectorAddHIPVectorized(const float4* a, const float4* b, float4* c, int n, int blockSize, int gridSize) {
+        vectorAddHIPVectorized<<<gridSize, blockSize>>>(a, b, c, n);
     }
 }

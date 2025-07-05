@@ -6,6 +6,11 @@
 #define BLOCK_SIZE 16
 #define TILE_SIZE 16
 
+#ifdef USE_CUDA
+// CUDA-specific includes and kernel launches
+#endif
+// Use gpu_utils.h for platform-agnostic GPU code
+
 // Naive matrix multiplication kernel
 __global__ void matrixMulNaive(const float *A, const float *B, float *C,
                                int M, int N, int K)

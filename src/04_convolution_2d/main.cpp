@@ -1,10 +1,14 @@
 #include "convolution.h"
+#ifdef USE_CUDA
 #include "../common/cuda_utils.h"
+#endif
 #include "../common/timer.h"
 #include "../common/helper_functions.h"
 #include <iostream>
 #include <vector>
 #include <iomanip>
+
+// Use gpu_utils.h for platform-agnostic GPU code
 
 void benchmark_convolution_kernel(const std::string &kernel_name, int method,
                                   const float *image, const float *kernel,

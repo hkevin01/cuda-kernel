@@ -1,3 +1,4 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include <cmath>
 
@@ -352,5 +353,16 @@ __global__ void spectral_analysis(
         
         // Spectral rolloff contribution
         atomicAdd(&power_spectrum[n], power);
+    }
+}
+
+// Wrapper functions for launching kernels from C++ files
+extern "C" {
+    void launchFFT1DRadix2Shared(Complex* data, int n, int direction, int stride, int blockSize, int gridSize) {
+        fft_1d_radix2_shared<<<gridSize, blockSize, blockSize * sizeof(Complex)>>>(data, n, direction, stride);
+    }
+    
+    void launchFFT3DOptimized(Complex* input, Complex* output, int nx, int ny, int nz, int direction, int phase, int blockSize, int gridSize) {
+        fft_3d_optimized<<<gridSize, blockSize>>>(input, output, nx, ny, nz, direction, phase);
     }
 }

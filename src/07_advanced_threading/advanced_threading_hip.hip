@@ -1,3 +1,4 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include <hip/hip_cooperative_groups.h>
 #include <cmath>
@@ -12,6 +13,25 @@ struct ThreadData {
     int state;
 };
 
+// Manual warp reduction function with 64-bit masks
+__device__ float warp_reduce_sum(float val) {
+    for (int offset = 16; offset > 0; offset /= 2) {
+        val += __shfl_down_sync(0xffffffffffffffffULL, val, offset);
+    }
+    return val;
+}
+
+// Manual warp reduction for active threads
+__device__ float warp_reduce_sum_active(float val, unsigned long long mask) {
+    for (int offset = 16; offset > 0; offset /= 2) {
+        float temp = __shfl_down_sync(mask, val, offset);
+        if ((mask >> (threadIdx.x + offset)) & 1) {
+            val += temp;
+        }
+    }
+    return val;
+}
+
 // Advanced kernel using cooperative groups and complex synchronization
 __global__ void advancedThreadSync(
     ThreadData* data,
@@ -22,8 +42,7 @@ __global__ void advancedThreadSync(
 ) {
     // Get cooperative group handles
     cg::grid_group grid = cg::this_grid();
-    cg::block_group block = cg::this_thread_block();
-    cg::thread_block_tile<32> warp = cg::tiled_partition<32>(block);
+    cg::thread_group block = cg::this_thread_block();
     
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int local_tid = threadIdx.x;
@@ -53,19 +72,19 @@ __global__ void advancedThreadSync(
         
         // Phase 2: Warp-level communication and reduction
         float warp_sum = energy_delta;
-        warp_sum = cg::reduce(warp, warp_sum, cg::plus<float>());
+        warp_sum = warp_reduce_sum(warp_sum);
         
-        if (warp.thread_rank() == 0) {
-            shared_buffer[warp.meta_group_rank()] = warp_sum;
+        if (threadIdx.x % 32 == 0) {
+            shared_buffer[threadIdx.x / 32] = warp_sum;
         }
         block.sync();
         
         // Phase 3: Block-level synchronization and shared computation
-        if (local_tid < warp.meta_group_size()) {
+        if (local_tid < blockDim.x / 32) {
             float block_sum = shared_buffer[local_tid];
-            block_sum = cg::reduce(warp, block_sum, cg::plus<float>());
+            block_sum = warp_reduce_sum(block_sum);
             
-            if (warp.thread_rank() == 0) {
+            if (threadIdx.x % 32 == 0) {
                 atomicAdd(&counters[blockIdx.x], 1);
                 shared_buffer[0] = block_sum;
             }
@@ -86,14 +105,14 @@ __global__ void advancedThreadSync(
         }
         
         // Phase 5: Conditional warp synchronization
-        auto active_threads = cg::coalesced_threads();
         if (local_data.state == 1) {
             float velocity_mag = sqrtf(local_data.velocity.x * local_data.velocity.x + 
                                      local_data.velocity.y * local_data.velocity.y);
-            velocity_mag = cg::reduce(active_threads, velocity_mag, cg::plus<float>());
+            unsigned long long active_mask = __ballot_sync(0xffffffffffffffffULL, local_data.state == 1);
+            velocity_mag = warp_reduce_sum_active(velocity_mag, active_mask);
             
-            if (active_threads.thread_rank() == 0) {
-                atomicAdd(&sync_flags[warp.meta_group_rank()], 1);
+            if (threadIdx.x % 32 == 0) {
+                atomicAdd((int*)&sync_flags[threadIdx.x / 32], 1);
             }
         }
         
@@ -245,7 +264,7 @@ __global__ void complexMemoryPatterns(
                 }
             }
             // Partial synchronization
-            __syncwarp();
+            __syncthreads();
         }
         // More synchronization
         __syncthreads();
@@ -330,5 +349,20 @@ __global__ void producerConsumerPattern(
         
         // Signal completion
         atomicSub((int*)&flags[queue_id], 1);
+    }
+}
+
+// Wrapper functions for launching kernels from C++ files
+extern "C" {
+    void launchAdvancedThreadSync(ThreadData* data, float* results, int* counters, int n, int iterations, int blockSize, int gridSize) {
+        advancedThreadSync<<<gridSize, blockSize>>>(data, results, counters, n, iterations);
+    }
+    
+    void launchLockFreeOperations(int* data, int* results, int n, int operations_per_thread, int blockSize, int gridSize) {
+        lockFreeOperations<<<gridSize, blockSize>>>(data, results, n, operations_per_thread);
+    }
+    
+    void launchComplexMemoryPatterns(float4* input, float4* output, int width, int height, int depth, int blockSize, int gridSize) {
+        complexMemoryPatterns<<<gridSize, blockSize>>>(input, output, width, height, depth);
     }
 }

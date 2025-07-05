@@ -2,6 +2,12 @@
 #include "../common/cuda_utils.h"
 #include <cub/cub.cuh>
 
+#ifdef USE_CUDA
+// CUDA-specific includes and kernel launches
+#endif
+
+// Use gpu_utils.h for platform-agnostic GPU code
+
 // Naive reduction kernel - demonstrates basic concept but has divergent warps
 __global__ void reduce_naive(float *input, float *output, int n)
 {

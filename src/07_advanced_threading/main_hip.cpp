@@ -1,3 +1,4 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include "hip_utils.h"
 #include "timer.h"
@@ -20,11 +21,9 @@ struct ThreadData
 // Kernel declarations
 extern "C"
 {
-    __global__ void advancedThreadSync(ThreadData *data, float *results, int *counters, int n, int iterations);
-    __global__ void lockFreeOperations(int *data, int *results, int n, int operations_per_thread);
-    __global__ void complexMemoryPatterns(float4 *input, float4 *output, int width, int height, int depth);
-    __global__ void producerConsumerPattern(int *input_queue, int *output_queue, int *queue_heads,
-                                            int *queue_tails, volatile int *flags, int queue_size, int num_items);
+    void launchAdvancedThreadSync(ThreadData *data, float *results, int *counters, int n, int iterations, int blockSize, int gridSize);
+    void launchLockFreeOperations(int *data, int *results, int n, int operations_per_thread, int blockSize, int gridSize);
+    void launchComplexMemoryPatterns(float4 *input, float4 *output, int width, int height, int depth, int blockSize, int gridSize);
 }
 
 class AdvancedThreadingBenchmark
@@ -96,8 +95,7 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         // Warmup
-        hipLaunchKernelGGL(advancedThreadSync, dim3(gridSize), dim3(blockSize), 0, 0,
-                           d_thread_data, d_results, d_counters, n, iterations);
+        launchAdvancedThreadSync(d_thread_data, d_results, d_counters, n, iterations, blockSize, gridSize);
         HIP_CHECK(hipDeviceSynchronize());
 
         // Benchmark
@@ -107,8 +105,7 @@ public:
         for (int run = 0; run < runs; run++)
         {
             HIP_CHECK(hipMemset(d_counters, 0, 128 * sizeof(int)));
-            hipLaunchKernelGGL(advancedThreadSync, dim3(gridSize), dim3(blockSize), 0, 0,
-                               d_thread_data, d_results, d_counters, n, iterations);
+            launchAdvancedThreadSync(d_thread_data, d_results, d_counters, n, iterations, blockSize, gridSize);
         }
 
         HIP_CHECK(hipEventRecord(stop));
@@ -200,8 +197,7 @@ public:
 
         HIP_CHECK(hipEventRecord(start));
 
-        hipLaunchKernelGGL(lockFreeOperations, dim3(gridSize), dim3(blockSize), 0, 0,
-                           d_data, d_results, n, operations_per_thread);
+        launchLockFreeOperations(d_data, d_results, n, operations_per_thread, blockSize, gridSize);
 
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
@@ -279,8 +275,7 @@ public:
 
         HIP_CHECK(hipEventRecord(start));
 
-        hipLaunchKernelGGL(complexMemoryPatterns, gridSize, blockSize, 0, 0,
-                           d_input, d_output, width, height, depth);
+        launchComplexMemoryPatterns(d_input, d_output, width, height, depth, blockSize.x, gridSize.x);
 
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));

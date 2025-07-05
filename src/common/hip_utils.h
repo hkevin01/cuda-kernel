@@ -1,6 +1,7 @@
 #ifndef HIP_UTILS_H
 #define HIP_UTILS_H
 
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include <iostream>
 #include <string>

@@ -1,5 +1,7 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include <cmath>
+#include <iostream>
 
 #define BLOCK_SIZE 256
 #define TILE_SIZE 64
@@ -119,10 +121,10 @@ __global__ void calculateForces_warp_optimized(
         // Calculate forces with all 32 particles using warp shuffle
         for (int j = 0; j < 32; j++) {
             float4 target_pos;
-            target_pos.x = __shfl_sync(0xFFFFFFFF, other_pos.x, j);
-            target_pos.y = __shfl_sync(0xFFFFFFFF, other_pos.y, j);
-            target_pos.z = __shfl_sync(0xFFFFFFFF, other_pos.z, j);
-            target_pos.w = __shfl_sync(0xFFFFFFFF, other_pos.w, j);
+            target_pos.x = __shfl_sync(0xffffffffffffffffULL, other_pos.x, j);
+            target_pos.y = __shfl_sync(0xffffffffffffffffULL, other_pos.y, j);
+            target_pos.z = __shfl_sync(0xffffffffffffffffULL, other_pos.z, j);
+            target_pos.w = __shfl_sync(0xffffffffffffffffULL, other_pos.w, j);
             
             if (i + j < n && gid != i + j) {
                 // Calculate distance
@@ -391,4 +393,60 @@ __global__ void handleCollisions(
             }
         }
     }
+}
+
+// Wrapper functions for launching kernels from C++ files
+extern "C" {
+    void launchCalculateForcesOptimized(float4* positions, float4* forces, int n, float softening, int blockSize, int gridSize) {
+        calculateForces_optimized<<<gridSize, blockSize, blockSize * sizeof(float4)>>>(positions, forces, n, softening);
+    }
+    
+    void launchCalculateForcesWarpOptimized(float4* positions, float4* forces, int n, int blockSize, int gridSize) {
+        calculateForces_warp_optimized<<<gridSize, blockSize, blockSize * sizeof(float4)>>>(positions, forces, n);
+    }
+    
+    void launchBuildOctree(float4* positions, TreeNode* nodes, int* node_assignments, int n, int max_nodes, float4 root_bounds_min, float4 root_bounds_max, int blockSize, int gridSize) {
+        buildOctree<<<gridSize, blockSize>>>(positions, nodes, node_assignments, n, max_nodes, root_bounds_min, root_bounds_max);
+    }
+    
+    void launchCalculateForcesBarnesHut(float4* positions, float4* forces, TreeNode* tree_nodes, int n, float theta, int blockSize, int gridSize) {
+        calculateForces_BarnesHut<<<gridSize, blockSize>>>(positions, forces, tree_nodes, n, theta);
+    }
+    
+    void launchUpdateParticles(float4* positions, float4* velocities, float4* forces, int n, float dt, int blockSize, int gridSize) {
+        updateParticles<<<gridSize, blockSize>>>(positions, velocities, forces, n, dt);
+    }
+    
+    void launchHandleCollisions(float4* positions, float4* velocities, int n, float collision_radius, float restitution, int blockSize, int gridSize) {
+        handleCollisions<<<gridSize, blockSize>>>(positions, velocities, n, collision_radius, restitution);
+    }
+}
+
+// Simple test main for standalone execution
+int main() {
+    const int n = 1024;
+    float4* d_positions;
+    float4* d_forces;
+    hipMalloc(&d_positions, n * sizeof(float4));
+    hipMalloc(&d_forces, n * sizeof(float4));
+    // Fill positions with dummy data
+    float4* h_positions = new float4[n];
+    for (int i = 0; i < n; ++i) h_positions[i] = {float(i), float(i%100), float(i%10), 1.0f};
+    hipMemcpy(d_positions, h_positions, n * sizeof(float4), hipMemcpyHostToDevice);
+    // Launch kernel
+    int blockSize = 256;
+    int gridSize = (n + blockSize - 1) / blockSize;
+    launchCalculateForcesOptimized(d_positions, d_forces, n, 1e-9f, blockSize, gridSize);
+    // Copy result back
+    float4* h_forces = new float4[n];
+    hipMemcpy(h_forces, d_forces, n * sizeof(float4), hipMemcpyDeviceToHost);
+    // Print checksum
+    double checksum = 0.0;
+    for (int i = 0; i < n; ++i) checksum += h_forces[i].x + h_forces[i].y + h_forces[i].z;
+    std::cout << "NBody checksum: " << checksum << std::endl;
+    delete[] h_positions;
+    delete[] h_forces;
+    hipFree(d_positions);
+    hipFree(d_forces);
+    return 0;
 }

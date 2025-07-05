@@ -1,5 +1,6 @@
-#include "hip_utils.h"
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
+#include "hip_utils.h"
 #include <iostream>
 #include <iomanip>
 

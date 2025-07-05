@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 
 // Mathematical constants
 const float PI = 3.14159265358979323846f;

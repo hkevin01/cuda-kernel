@@ -1,9 +1,11 @@
 #include "matrix_mul.h"
+#ifdef USE_CUDA
 #include "cuda_utils.h"
+#include <cublas_v2.h>
+#endif
 #include "timer.h"
 #include "helper_functions.h"
 #include <iostream>
-#include <cublas_v2.h>
 
 int main()
 {

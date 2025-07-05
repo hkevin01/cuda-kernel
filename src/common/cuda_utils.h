@@ -1,6 +1,8 @@
 #pragma once
 
+#ifdef USE_CUDA
 #include <cuda_runtime.h>
+#endif
 #include <iostream>
 #include <string>
 
@@ -135,3 +137,5 @@ public:
 private:
     cudaEvent_t start_event, stop_event;
 };
+
+// Use gpu_utils.h for platform-agnostic GPU code

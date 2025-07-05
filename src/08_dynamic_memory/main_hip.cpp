@@ -1,3 +1,4 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include "hip_utils.h"
 #include "timer.h"
@@ -39,13 +40,10 @@ struct ComplexQueue
 
 extern "C"
 {
-    __global__ void dynamicTreeBuild(GPUMemoryPool *memory_pool, DynamicNode *nodes,
-                                     float4 *input_data, int *results, int n, int max_depth);
-    __global__ void gpuQuickSort(float *data, int *indices, GPUMemoryPool *memory_pool, int n, int depth);
-    __global__ void complexMemoryCoalescing(float *input, float *output, int *pattern,
-                                            int width, int height, int stride_pattern);
-    __global__ void complexProducerConsumer(ComplexQueue *queues, float *results,
-                                            int num_queues, int items_per_thread, int num_consumers);
+    void launchDynamicTreeBuild(GPUMemoryPool *memory_pool, DynamicNode *nodes,
+                                float4 *input_data, int *results, int n, int max_depth, int blockSize, int gridSize);
+    void launchComplexMemoryCoalescing(float *input, float *output, int *pattern,
+                                       int width, int height, int stride_pattern, int blockSize, int gridSize);
 }
 
 class DynamicMemoryBenchmark
@@ -129,8 +127,7 @@ public:
 
         HIP_CHECK(hipEventRecord(start));
 
-        hipLaunchKernelGGL(dynamicTreeBuild, dim3(gridSize), dim3(blockSize), 0, 0,
-                           d_pool, d_nodes, d_input_data, d_results, n, max_depth);
+        launchDynamicTreeBuild(d_pool, d_nodes, d_input_data, d_results, n, max_depth, blockSize, gridSize);
 
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
@@ -233,8 +230,7 @@ public:
 
             HIP_CHECK(hipEventRecord(start));
 
-            hipLaunchKernelGGL(complexMemoryCoalescing, dim3(gridSize), dim3(blockSize), 0, 0,
-                               d_input, d_output, d_pattern, width, height, stride);
+            launchComplexMemoryCoalescing(d_input, d_output, d_pattern, width, height, stride, blockSize, gridSize);
 
             HIP_CHECK(hipEventRecord(stop));
             HIP_CHECK(hipEventSynchronize(stop));

@@ -372,3 +372,14 @@ __global__ void complexProducerConsumer(
         results[tid] = total_consumed;
     }
 }
+
+// Wrapper functions for launching kernels from C++ files
+extern "C" {
+    void launchDynamicTreeBuild(GPUMemoryPool* memory_pool, DynamicNode* nodes, float4* input_data, int* results, int n, int max_depth, int blockSize, int gridSize) {
+        dynamicTreeBuild<<<gridSize, blockSize>>>(memory_pool, nodes, input_data, results, n, max_depth);
+    }
+    
+    void launchComplexMemoryCoalescing(float* input, float* output, int* pattern, int width, int height, int stride, int blockSize, int gridSize) {
+        complexMemoryCoalescing<<<gridSize, blockSize>>>(input, output, pattern, width, height, stride);
+    }
+}

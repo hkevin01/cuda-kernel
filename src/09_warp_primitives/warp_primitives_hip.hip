@@ -1,7 +1,42 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include <hip/hip_cooperative_groups.h>
 
 namespace cg = cooperative_groups;
+
+// Manual warp reduction functions with 64-bit masks
+__device__ float warp_reduce_sum(float val) {
+    for (int offset = 16; offset > 0; offset /= 2) {
+        val += __shfl_down_sync(0xffffffffffffffffULL, val, offset);
+    }
+    return val;
+}
+
+__device__ int warp_reduce_max(int val) {
+    for (int offset = 16; offset > 0; offset /= 2) {
+        int temp = __shfl_down_sync(0xffffffffffffffffULL, val, offset);
+        val = max(val, temp);
+    }
+    return val;
+}
+
+__device__ int warp_reduce_min(int val) {
+    for (int offset = 16; offset > 0; offset /= 2) {
+        int temp = __shfl_down_sync(0xffffffffffffffffULL, val, offset);
+        val = min(val, temp);
+    }
+    return val;
+}
+
+__device__ int warp_scan_inclusive(int val) {
+    for (int offset = 1; offset < 32; offset *= 2) {
+        int temp = __shfl_up_sync(0xffffffffffffffffULL, val, offset);
+        if (threadIdx.x % 32 >= offset) {
+            val += temp;
+        }
+    }
+    return val;
+}
 
 // Advanced tensor computation using warp primitives
 __global__ void advancedTensorOperations(
@@ -57,25 +92,25 @@ __global__ void advancedTensorOperations(
             }
             
             // Get A value for this k iteration
-            float a_broadcast = warp.shfl(a_vals[0].x, kk);
+            float a_broadcast = __shfl_sync(0xffffffffffffffffULL, a_vals[0].x, kk);
             
             // Complex tensor operation with multiple accumulations
             for (int i = 0; i < 4; i++) {
-                float a_val = warp.shfl(a_vals[i].x, kk);
+                float a_val = __shfl_sync(0xffffffffffffffffULL, a_vals[i].x, kk);
                 
                 // Warp-level reduction for partial products
                 float partial_product = a_val * b_val;
                 
                 // Use warp primitives for advanced operations
-                float warp_sum = warp.shfl_down(partial_product, 16);
+                float warp_sum = __shfl_down_sync(0xffffffffffffffffULL, partial_product, 16);
                 partial_product += warp_sum;
-                warp_sum = warp.shfl_down(partial_product, 8);
+                warp_sum = __shfl_down_sync(0xffffffffffffffffULL, partial_product, 8);
                 partial_product += warp_sum;
-                warp_sum = warp.shfl_down(partial_product, 4);
+                warp_sum = __shfl_down_sync(0xffffffffffffffffULL, partial_product, 4);
                 partial_product += warp_sum;
-                warp_sum = warp.shfl_down(partial_product, 2);
+                warp_sum = __shfl_down_sync(0xffffffffffffffffULL, partial_product, 2);
                 partial_product += warp_sum;
-                warp_sum = warp.shfl_down(partial_product, 1);
+                warp_sum = __shfl_down_sync(0xffffffffffffffffULL, partial_product, 1);
                 partial_product += warp_sum;
                 
                 // Complex accumulation pattern
@@ -122,40 +157,48 @@ __global__ void warpPrimitivesShowcase(
     int value = input[tid];
     
     // 1. Warp shuffle operations
-    int shuffled_up = warp.shfl_up(value, 1);
-    int shuffled_down = warp.shfl_down(value, 1);
-    int shuffled_xor = warp.shfl_xor(value, 1);
-    int shuffled_idx = warp.shfl(value, (lane_id + 16) % 32);
+    int shuffled_up = __shfl_up_sync(0xffffffffffffffffULL, value, 1);
+    int shuffled_down = __shfl_down_sync(0xffffffffffffffffULL, value, 1);
+    int shuffled_xor = __shfl_xor_sync(0xffffffffffffffffULL, value, 1);
+    int shuffled_idx = __shfl_sync(0xffffffffffffffffULL, value, (lane_id + 16) % 32);
     
     // 2. Warp vote operations
     bool predicate = (value % 2 == 0);
-    bool all_even = warp.all(predicate);
-    bool any_even = warp.any(predicate);
-    unsigned ballot_result = warp.ballot(predicate);
+    bool all_even = __all_sync(0xffffffffffffffffULL, predicate);
+    bool any_even = __any_sync(0xffffffffffffffffULL, predicate);
+    unsigned long long ballot_result = __ballot_sync(0xffffffffffffffffULL, predicate);
     
-    // 3. Warp reduction operations
-    int sum = cg::reduce(warp, value, cg::plus<int>());
-    int max_val = cg::reduce(warp, value, cg::greater<int>());
-    int min_val = cg::reduce(warp, value, cg::less<int>());
+    // 3. Warp reduction operations using manual implementation
+    int sum = warp_reduce_sum(value);
+    int max_val = warp_reduce_max(value);
+    int min_val = warp_reduce_min(value);
     
-    // 4. Warp scan operations
-    int inclusive_scan = cg::inclusive_scan(warp, value, cg::plus<int>());
-    int exclusive_scan = cg::exclusive_scan(warp, value, cg::plus<int>());
+    // 4. Warp scan operations using manual implementation
+    int inclusive_scan = warp_scan_inclusive(value);
+    int exclusive_scan = __shfl_up_sync(0xffffffffffffffffULL, inclusive_scan, 1);
+    if (lane_id == 0) exclusive_scan = 0;
     
     // 5. Complex warp-level computation
     int complex_result = value;
     
     // Multi-stage shuffle-based computation
     for (int offset = 1; offset < 32; offset *= 2) {
-        int neighbor = warp.shfl_xor(complex_result, offset);
+        int neighbor = __shfl_xor_sync(0xffffffffffffffffULL, complex_result, offset);
         complex_result = (complex_result * neighbor) % 1000007; // Large prime
     }
     
     // Conditional warp operations
-    auto active_mask = warp.ballot(value > 50);
+    auto active_mask = __ballot_sync(0xffffffffffffffffULL, value > 50);
     if (value > 50) {
-        auto active_threads = cg::coalesced_threads();
-        complex_result = cg::reduce(active_threads, complex_result, cg::plus<int>());
+        // Manual reduction for active threads
+        int temp_result = complex_result;
+        for (int offset = 16; offset > 0; offset /= 2) {
+            int neighbor = __shfl_down_sync(active_mask, temp_result, offset);
+            if ((active_mask >> (lane_id + offset)) & 1) {
+                temp_result += neighbor;
+            }
+        }
+        complex_result = temp_result;
     }
     
     // Store individual thread results
@@ -168,11 +211,11 @@ __global__ void warpPrimitivesShowcase(
         warp_results[warp_id * 8 + 0] = sum;
         warp_results[warp_id * 8 + 1] = max_val;
         warp_results[warp_id * 8 + 2] = min_val;
-        warp_results[warp_id * 8 + 3] = ballot_result;
+        warp_results[warp_id * 8 + 3] = (int)ballot_result;
         warp_results[warp_id * 8 + 4] = all_even ? 1 : 0;
         warp_results[warp_id * 8 + 5] = any_even ? 1 : 0;
-        warp_results[warp_id * 8 + 6] = active_mask;
-        warp_results[warp_id * 8 + 7] = complex_result;
+        warp_results[warp_id * 8 + 6] = inclusive_scan;
+        warp_results[warp_id * 8 + 7] = exclusive_scan;
     }
 }
 
@@ -196,14 +239,22 @@ __global__ void multiLevelReduction(
     
     // Apply different reduction operations based on type
     switch (reduction_type) {
-        case 0: // Sum
-            value = cg::reduce(warp, value, cg::plus<float>());
+        case 0: // Sum - manual warp reduction
+            for (int offset = 16; offset > 0; offset /= 2) {
+                value += warp.shfl_down(value, offset);
+            }
             break;
-        case 1: // Max
-            value = cg::reduce(warp, value, cg::greater<float>());
+        case 1: // Max - manual warp reduction
+            for (int offset = 16; offset > 0; offset /= 2) {
+                float neighbor = warp.shfl_down(value, offset);
+                value = fmaxf(value, neighbor);
+            }
             break;
-        case 2: // Min
-            value = cg::reduce(warp, value, cg::less<float>());
+        case 2: // Min - manual warp reduction
+            for (int offset = 16; offset > 0; offset /= 2) {
+                float neighbor = warp.shfl_down(value, offset);
+                value = fminf(value, neighbor);
+            }
             break;
         case 3: // Product (with overflow protection)
             for (int offset = 1; offset < 32; offset *= 2) {
@@ -215,7 +266,7 @@ __global__ void multiLevelReduction(
             break;
         case 4: // Complex reduction (RMS)
             value = value * value; // Square first
-            value = cg::reduce(warp, value, cg::plus<float>());
+            value = warp_reduce_sum(value);
             if (warp.thread_rank() == 0) {
                 value = sqrtf(value / 32.0f);
             }
@@ -235,14 +286,22 @@ __global__ void multiLevelReduction(
         
         // Final warp reduction
         switch (reduction_type) {
-            case 0:
-                warp_val = cg::reduce(warp, warp_val, cg::plus<float>());
+            case 0: // Sum
+                for (int offset = 16; offset > 0; offset /= 2) {
+                    warp_val += warp.shfl_down(warp_val, offset);
+                }
                 break;
-            case 1:
-                warp_val = cg::reduce(warp, warp_val, cg::greater<float>());
+            case 1: // Max
+                for (int offset = 16; offset > 0; offset /= 2) {
+                    float neighbor = warp.shfl_down(warp_val, offset);
+                    warp_val = fmaxf(warp_val, neighbor);
+                }
                 break;
-            case 2:
-                warp_val = cg::reduce(warp, warp_val, cg::less<float>());
+            case 2: // Min
+                for (int offset = 16; offset > 0; offset /= 2) {
+                    float neighbor = warp.shfl_down(warp_val, offset);
+                    warp_val = fminf(warp_val, neighbor);
+                }
                 break;
             case 3:
                 for (int offset = 1; offset < 32; offset *= 2) {
@@ -253,7 +312,7 @@ __global__ void multiLevelReduction(
                 }
                 break;
             case 4:
-                warp_val = cg::reduce(warp, warp_val, cg::plus<float>());
+                warp_val = warp_reduce_sum(warp_val);
                 if (warp.thread_rank() == 0) {
                     warp_val = sqrtf(warp_val / (blockDim.x / 32.0f));
                 }
@@ -303,8 +362,8 @@ __global__ void warpMatrixTranspose(
         }
     }
     
-    // Synchronize at warp level (using shared memory barrier)
-    __syncwarp();
+    // Synchronize at warp level (using block barrier instead)
+    __syncthreads();
     
     // Collaborative storing with transpose
     for (int i = 0; i < 32; i++) {
@@ -347,8 +406,8 @@ __global__ void warpBitonicSort(
                 value = partner_value;
             }
             
-            // Synchronize warp
-            __syncwarp();
+            // Synchronize warp - use thread barrier
+            __syncthreads();
         }
     }
     
@@ -374,11 +433,27 @@ __global__ void warpPrefixSum(
     float f_val = input_float[tid];
     int i_val = input_int[tid];
     
-    // Float prefix sum
-    float f_prefix = cg::exclusive_scan(warp, f_val, cg::plus<float>());
+    // Float prefix sum - manual implementation
+    float f_prefix = f_val;
+    for (int offset = 1; offset < 32; offset *= 2) {
+        float neighbor = warp.shfl_up(f_prefix, offset);
+        if (warp.thread_rank() >= offset) {
+            f_prefix += neighbor;
+        }
+    }
+    f_prefix = warp.shfl_up(f_prefix, 1); // Convert to exclusive
+    if (warp.thread_rank() == 0) f_prefix = 0.0f;
     
-    // Integer prefix sum
-    int i_prefix = cg::exclusive_scan(warp, i_val, cg::plus<int>());
+    // Integer prefix sum - manual implementation  
+    int i_prefix = i_val;
+    for (int offset = 1; offset < 32; offset *= 2) {
+        int neighbor = warp.shfl_up(i_prefix, offset);
+        if (warp.thread_rank() >= offset) {
+            i_prefix += neighbor;
+        }
+    }
+    i_prefix = warp.shfl_up(i_prefix, 1); // Convert to exclusive
+    if (warp.thread_rank() == 0) i_prefix = 0;
     
     // Combined computation with warp-level communication
     long long combined = (long long)(f_val * 1000.0f) + i_val;
@@ -430,7 +505,7 @@ __global__ void warpOptimizedConvolution(
         }
     }
     
-    __syncwarp();
+    __syncthreads();
     
     // Process convolution using warp cooperation
     for (int local_y = 0; local_y < 32; local_y++) {
@@ -453,10 +528,14 @@ __global__ void warpOptimizedConvolution(
                 }
             }
             
-            // Warp-level result sharing and processing
-            float warp_max = cg::reduce(warp, fabsf(result), cg::greater<float>());
-            if (warp_max > 0.0f) {
-                result = result / warp_max; // Normalize by warp max
+            // Warp-level result sharing and processing - manual reduction
+            float result_max = fabsf(result);
+            for (int offset = 16; offset > 0; offset /= 2) {
+                float neighbor = warp.shfl_down(result_max, offset);
+                result_max = fmaxf(result_max, neighbor);
+            }
+            if (result_max > 0.0f) {
+                result = result / result_max; // Normalize by warp max
             }
             
             output[global_y * width + global_x] = result;
@@ -590,7 +669,7 @@ __global__ void warpStringProcessing(
     }
     
     // Warp-level match aggregation
-    unsigned match_mask = warp.ballot(match);
+    unsigned match_mask = __ballot_sync(__activemask(), match);
     int match_count = __popc(match_mask);
     
     // Store results
@@ -644,6 +723,41 @@ __global__ void warpGraphTraversal(
         }
     }
     
-    // Warp-level synchronization for queue management
-    __syncwarp();
+    // Warp-level synchronization for queue management - use thread barrier
+    __syncthreads();
+}
+
+// Wrapper functions for launching kernels from C++ files
+extern "C" {
+    void launchAdvancedTensorOperations(float* A, float* B, float* C, int M, int N, int K, float alpha, float beta, int blockSize, int gridSize) {
+        advancedTensorOperations<<<gridSize, blockSize>>>(A, B, C, M, N, K, alpha, beta);
+    }
+    
+    void launchWarpPrimitivesShowcase(int* input, int* output, int* warp_results, int n, int blockSize, int gridSize) {
+        warpPrimitivesShowcase<<<gridSize, blockSize>>>(input, output, warp_results, n);
+    }
+    
+    void launchMultiLevelReduction(float* input, float* output, int n, int type, int blockSize, int gridSize) {
+        multiLevelReduction<<<gridSize, blockSize>>>(input, output, n, type);
+    }
+    
+    void launchWarpMatrixTranspose(float* input, float* output, int rows, int cols, int blockSize, int gridSize) {
+        warpMatrixTranspose<<<gridSize, blockSize>>>(input, output, rows, cols);
+    }
+    
+    void launchWarpBitonicSort(int* data, int n, int blockSize, int gridSize) {
+        warpBitonicSort<<<gridSize, blockSize>>>(data, n);
+    }
+    
+    void launchWarpPrefixSum(float* input_float, int* input_int, float* output_float, int* output_int, long long* output_combined, int n, int blockSize, int gridSize) {
+        warpPrefixSum<<<gridSize, blockSize>>>(input_float, input_int, output_float, output_int, output_combined, n);
+    }
+    
+    void launchWarpOptimizedConvolution(float* input, float* filter, float* output, int width, int height, int filter_size, int blockSize, int gridSize) {
+        warpOptimizedConvolution<<<gridSize, blockSize>>>(input, filter, output, width, height, filter_size);
+    }
+    
+    void launchMultiWarpMatrixMul(float* A, float* B, float* C, int M, int N, int K, int blockSize, int gridSize) {
+        multiWarpMatrixMul<<<gridSize, blockSize>>>(A, B, C, M, N, K);
+    }
 }

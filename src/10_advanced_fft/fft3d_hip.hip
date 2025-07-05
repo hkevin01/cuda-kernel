@@ -1,5 +1,7 @@
+#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include <cmath>
+#include <iostream>
 
 #define PI 3.14159265358979323846f
 #define MAX_FFT_SIZE 1024
@@ -124,7 +126,11 @@ __global__ void fft3D_separable(
     
     if (idx >= nx || idy >= ny || idz >= nz) return;
     
-    __shared__ Complex tile[16][16][16];  // 3D shared memory tile
+    __shared__ float2 tile[16][16][16];  // 3D shared memory tile
+    // Initialize shared memory
+    if (threadIdx.x < 16 && threadIdx.y < 16 && threadIdx.z < 16) {
+        tile[threadIdx.z][threadIdx.y][threadIdx.x] = make_float2(0.0f, 0.0f);
+    }
     
     // Load data with optimal access pattern
     int local_x = threadIdx.x;
@@ -133,7 +139,8 @@ __global__ void fft3D_separable(
     
     if (local_x < 16 && local_y < 16 && local_z < 16) {
         int global_idx = idz * nx * ny + idy * nx + idx;
-        tile[local_z][local_y][local_x] = data[global_idx];
+        Complex val = data[global_idx];
+        tile[local_z][local_y][local_x] = make_float2(val.real, val.imag);
     }
     __syncthreads();
     
@@ -145,21 +152,21 @@ __global__ void fft3D_separable(
         case 0: // X-direction
             line_size = min(16, nx - (blockIdx.x * 16));
             for (int i = 0; i < line_size; i++) {
-                line_data[i] = tile[local_z][local_y][i];
+                line_data[i] = Complex(tile[local_z][local_y][i].x, tile[local_z][local_y][i].y);
             }
             break;
             
         case 1: // Y-direction
             line_size = min(16, ny - (blockIdx.y * 16));
             for (int i = 0; i < line_size; i++) {
-                line_data[i] = tile[local_z][i][local_x];
+                line_data[i] = Complex(tile[local_z][i][local_x].x, tile[local_z][i][local_x].y);
             }
             break;
             
         case 2: // Z-direction
             line_size = min(16, nz - (blockIdx.z * 16));
             for (int i = 0; i < line_size; i++) {
-                line_data[i] = tile[i][local_y][local_x];
+                line_data[i] = Complex(tile[i][local_y][local_x].x, tile[i][local_y][local_x].y);
             }
             break;
     }
@@ -186,17 +193,17 @@ __global__ void fft3D_separable(
     switch (axis) {
         case 0:
             for (int i = 0; i < line_size; i++) {
-                tile[local_z][local_y][i] = line_data[i];
+                tile[local_z][local_y][i] = make_float2(line_data[i].real, line_data[i].imag);
             }
             break;
         case 1:
             for (int i = 0; i < line_size; i++) {
-                tile[local_z][i][local_x] = line_data[i];
+                tile[local_z][i][local_x] = make_float2(line_data[i].real, line_data[i].imag);
             }
             break;
         case 2:
             for (int i = 0; i < line_size; i++) {
-                tile[i][local_y][local_x] = line_data[i];
+                tile[i][local_y][local_x] = make_float2(line_data[i].real, line_data[i].imag);
             }
             break;
     }
@@ -205,7 +212,8 @@ __global__ void fft3D_separable(
     // Write back to global memory with coalesced access
     if (local_x < 16 && local_y < 16 && local_z < 16) {
         int global_idx = idz * nx * ny + idy * nx + idx;
-        temp_data[global_idx] = tile[local_z][local_y][local_x];
+        float2 val = tile[local_z][local_y][local_x];
+        temp_data[global_idx] = Complex(val.x, val.y);
     }
 }
 
@@ -242,7 +250,12 @@ __global__ void advanced_3d_filter(
     
     if (idx >= nx || idy >= ny || idz >= nz) return;
     
-    __shared__ Complex shared_input[8][8][8];
+    __shared__ float2 shared_input[8][8][8];
+    // Initialize shared memory
+    if (threadIdx.x < 8 && threadIdx.y < 8 && threadIdx.z < 8) {
+        shared_input[threadIdx.z][threadIdx.y][threadIdx.x] = make_float2(0.0f, 0.0f);
+    }
+    
     __shared__ float shared_filter[64];  // Assuming max filter size 4x4x4
     
     // Collaborative loading of filter coefficients
@@ -260,7 +273,8 @@ __global__ void advanced_3d_filter(
     
     if (local_x < 8 && local_y < 8 && local_z < 8) {
         int global_idx = idz * nx * ny + idy * nx + idx;
-        shared_input[local_z][local_y][local_x] = input[global_idx];
+        Complex val = input[global_idx];
+        shared_input[local_z][local_y][local_x] = make_float2(val.real, val.imag);
     }
     __syncthreads();
     
@@ -284,7 +298,7 @@ __global__ void advanced_3d_filter(
                                    (fy + half_filter) * filter_size + 
                                    (fx + half_filter);
                     
-                    Complex sample = shared_input[sample_z][sample_y][sample_x];
+                    Complex sample = Complex(shared_input[sample_z][sample_y][sample_x].x, shared_input[sample_z][sample_y][sample_x].y);
                     float coeff = shared_filter[filter_idx];
                     
                     result = result + Complex(sample.real * coeff, sample.imag * coeff);
@@ -296,4 +310,43 @@ __global__ void advanced_3d_filter(
     // Write result
     int global_idx = idz * nx * ny + idy * nx + idx;
     output[global_idx] = result;
+}
+
+// Simple test main for standalone execution
+extern "C" void launchFFT3DOptimized(Complex* input, Complex* output, int nx, int ny, int nz, int direction, int phase, int blockSize, int gridSize);
+
+extern "C" void launchFFT3DOptimized(Complex* input, Complex* output, int nx, int ny, int nz, int direction, int phase, int blockSize, int gridSize) {
+    // For demonstration, just launch fft3D_separable with axis=0
+    dim3 block(blockSize, 1, 1);
+    dim3 grid(gridSize, 1, 1);
+    fft3D_separable<<<grid, block>>>(input, output, nx, ny, nz, direction, 0);
+}
+
+int main() {
+    const int nx = 16, ny = 16, nz = 16;
+    int n = nx * ny * nz;
+    Complex* d_input;
+    Complex* d_output;
+    hipMalloc(&d_input, n * sizeof(Complex));
+    hipMalloc(&d_output, n * sizeof(Complex));
+    // Fill input with dummy data
+    Complex* h_input = new Complex[n];
+    for (int i = 0; i < n; ++i) h_input[i] = Complex(float(i), 0.0f);
+    hipMemcpy(d_input, h_input, n * sizeof(Complex), hipMemcpyHostToDevice);
+    // Launch kernel
+    int blockSize = 256;
+    int gridSize = (n + blockSize - 1) / blockSize;
+    launchFFT3DOptimized(d_input, d_output, nx, ny, nz, 1, 0, blockSize, gridSize);
+    // Copy result back
+    Complex* h_output = new Complex[n];
+    hipMemcpy(h_output, d_output, n * sizeof(Complex), hipMemcpyDeviceToHost);
+    // Print checksum
+    double checksum = 0.0;
+    for (int i = 0; i < n; ++i) checksum += h_output[i].real + h_output[i].imag;
+    std::cout << "FFT3D checksum: " << checksum << std::endl;
+    delete[] h_input;
+    delete[] h_output;
+    hipFree(d_input);
+    hipFree(d_output);
+    return 0;
 }

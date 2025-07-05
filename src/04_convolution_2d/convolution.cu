@@ -2,6 +2,11 @@
 #include "../common/cuda_utils.h"
 #include <cmath>
 
+#ifdef USE_CUDA
+// CUDA-specific includes and kernel launches
+#endif
+// Use gpu_utils.h for platform-agnostic GPU code
+
 // Naive convolution kernel - simple but inefficient
 __global__ void convolution_naive(const float *input, const float *kernel,
                                   float *output, int width, int height,

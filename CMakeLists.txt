@@ -105,57 +105,109 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Common utilities library
 add_library(cuda_common STATIC
-    src/common/cuda_utils.cu
     src/common/timer.cpp
     src/common/helper_functions.cpp
 )
 
-target_link_libraries(cuda_common CUDA::cudart)
+# Add platform-specific source files
+if(USE_CUDA)
+    target_sources(cuda_common PRIVATE src/common/cuda_utils.cu)
+    target_link_libraries(cuda_common ${GPU_RUNTIME_LIB})
+elseif(USE_HIP)
+    target_sources(cuda_common PRIVATE src/common/hip_utils.cpp)
+    target_link_libraries(cuda_common ${GPU_RUNTIME_LIB})
+endif()
 
-# Example 1: Vector Addition
-add_executable(vector_addition
-    src/01_vector_addition/vector_addition.cu
-    src/01_vector_addition/main.cpp
-)
-target_link_libraries(vector_addition cuda_common CUDA::cudart)
+# Example 1: Vector Addition (has HIP version)
+if(USE_CUDA)
+    add_executable(vector_addition
+        src/01_vector_addition/vector_addition.cu
+        src/01_vector_addition/main.cpp
+    )
+elseif(USE_HIP)
+    add_executable(vector_addition
+        src/01_vector_addition/vector_addition_hip.hip
+        src/01_vector_addition/main_hip.cpp
+    )
+endif()
+target_link_libraries(vector_addition cuda_common ${GPU_RUNTIME_LIB})
 
-# Example 2: Matrix Multiplication
-add_executable(matrix_multiplication
-    src/02_matrix_multiplication/matrix_mul.cu
-    src/02_matrix_multiplication/main.cpp
-)
-target_link_libraries(matrix_multiplication cuda_common CUDA::cudart CUDA::cublas)
+# Note: Examples 2-5 don't have HIP versions yet, so they're skipped for HIP builds
 
-# Example 3: Parallel Reduction
-add_executable(parallel_reduction
-    src/03_parallel_reduction/reduction.cu
-    src/03_parallel_reduction/main.cpp
-)
-target_link_libraries(parallel_reduction cuda_common CUDA::cudart)
+# Example 7: Advanced Threading (has HIP version)
+if(USE_CUDA)
+    # Skip for now - no CUDA version
+elseif(USE_HIP)
+    add_executable(advanced_threading
+        src/07_advanced_threading/advanced_threading_hip.hip
+        src/07_advanced_threading/main_hip.cpp
+    )
+    target_link_libraries(advanced_threading cuda_common ${GPU_RUNTIME_LIB})
+endif()
 
-# Example 4: 2D Convolution
-add_executable(convolution_2d
-    src/04_convolution_2d/convolution.cu
-    src/04_convolution_2d/main.cpp
-)
-target_link_libraries(convolution_2d cuda_common CUDA::cudart)
+# Example 8: Dynamic Memory (has HIP version)
+if(USE_CUDA)
+    # Skip for now - no CUDA version
+elseif(USE_HIP)
+    add_executable(dynamic_memory
+        src/08_dynamic_memory/dynamic_memory_hip.hip
+        src/08_dynamic_memory/main_hip.cpp
+    )
+    target_link_libraries(dynamic_memory cuda_common ${GPU_RUNTIME_LIB})
+endif()
 
-# Example 5: Monte Carlo Simulation
-add_executable(monte_carlo
-    src/05_monte_carlo/monte_carlo.cu
-    src/05_monte_carlo/main.cpp
-)
-target_link_libraries(monte_carlo cuda_common CUDA::cudart CUDA::curand)
+# Example 9: Warp Primitives (has HIP version)
+if(USE_CUDA)
+    # Skip for now - no CUDA version
+elseif(USE_HIP)
+    add_executable(warp_primitives
+        src/09_warp_primitives/warp_primitives_hip.hip
+        src/09_warp_primitives/main_hip.cpp
+    )
+    target_link_libraries(warp_primitives cuda_common ${GPU_RUNTIME_LIB})
+endif()
+
+# Example 10: Advanced FFT (has HIP version)
+if(USE_CUDA)
+    # Skip for now - no CUDA version
+elseif(USE_HIP)
+    add_executable(advanced_fft
+        src/10_advanced_fft/fft3d_hip.hip
+    )
+    target_link_libraries(advanced_fft cuda_common ${GPU_RUNTIME_LIB})
+endif()
+
+# Example 11: N-Body Simulation (has HIP version)
+if(USE_CUDA)
+    # Skip for now - no CUDA version
+elseif(USE_HIP)
+    add_executable(nbody_simulation
+        src/11_nbody_simulation/nbody_hip.hip
+    )
+    target_link_libraries(nbody_simulation cuda_common ${GPU_RUNTIME_LIB})
+endif()
 
 # Install targets
-install(TARGETS 
-    vector_addition 
-    matrix_multiplication 
-    parallel_reduction 
-    convolution_2d 
-    monte_carlo
-    DESTINATION bin
-)
+if(USE_CUDA)
+    install(TARGETS 
+        vector_addition 
+        matrix_multiplication 
+        parallel_reduction 
+        convolution_2d 
+        monte_carlo
+        DESTINATION bin
+    )
+elseif(USE_HIP)
+    install(TARGETS 
+        vector_addition 
+        advanced_threading
+        dynamic_memory
+        warp_primitives
+        advanced_fft
+        nbody_simulation
+        DESTINATION bin
+    )
+endif()
 
 # Testing (optional)
 option(BUILD_TESTS "Build tests" OFF)
@@ -164,8 +216,15 @@ if(BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
+# GUI (optional)
+option(BUILD_GUI "Build GUI application" ON)
+if(BUILD_GUI)
+    add_subdirectory(gui)
+endif()
+
 # Print configuration info
 message(STATUS "CUDA Version: ${CMAKE_CUDA_COMPILER_VERSION}")
 message(STATUS "CUDA Architectures: ${CMAKE_CUDA_ARCHITECTURES}")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Profiling Enabled: ${ENABLE_PROFILING}")
+message(STATUS "GUI Enabled: ${BUILD_GUI}")
