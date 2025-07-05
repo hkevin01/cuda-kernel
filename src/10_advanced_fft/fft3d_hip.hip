@@ -327,26 +327,65 @@ int main() {
     int n = nx * ny * nz;
     Complex* d_input;
     Complex* d_output;
-    hipMalloc(&d_input, n * sizeof(Complex));
-    hipMalloc(&d_output, n * sizeof(Complex));
+    // Allocate device memory
+    hipError_t err;
+    err = hipMalloc(&d_input, n * sizeof(Complex));
+    if (err != hipSuccess) {
+        printf("Error: hipMalloc failed for d_input: %s\n", hipGetErrorString(err));
+        return 0;
+    }
+    
+    err = hipMalloc(&d_output, n * sizeof(Complex));
+    if (err != hipSuccess) {
+        printf("Error: hipMalloc failed for d_output: %s\n", hipGetErrorString(err));
+        hipFree(d_input);
+        return 0;
+    }
+    
     // Fill input with dummy data
     Complex* h_input = new Complex[n];
     for (int i = 0; i < n; ++i) h_input[i] = Complex(float(i), 0.0f);
-    hipMemcpy(d_input, h_input, n * sizeof(Complex), hipMemcpyHostToDevice);
+    
+    err = hipMemcpy(d_input, h_input, n * sizeof(Complex), hipMemcpyHostToDevice);
+    if (err != hipSuccess) {
+        printf("Error: hipMemcpy H2D failed: %s\n", hipGetErrorString(err));
+        hipFree(d_input);
+        hipFree(d_output);
+        delete[] h_input;
+        return 0;
+    }
+    
     // Launch kernel
     int blockSize = 256;
     int gridSize = (n + blockSize - 1) / blockSize;
     launchFFT3DOptimized(d_input, d_output, nx, ny, nz, 1, 0, blockSize, gridSize);
+    
     // Copy result back
     Complex* h_output = new Complex[n];
-    hipMemcpy(h_output, d_output, n * sizeof(Complex), hipMemcpyDeviceToHost);
-    // Print checksum
-    double checksum = 0.0;
-    for (int i = 0; i < n; ++i) checksum += h_output[i].real + h_output[i].imag;
-    std::cout << "FFT3D checksum: " << checksum << std::endl;
+    err = hipMemcpy(h_output, d_output, n * sizeof(Complex), hipMemcpyDeviceToHost);
+    if (err != hipSuccess) {
+        printf("Error: hipMemcpy D2H failed: %s\n", hipGetErrorString(err));
+    }
+    
+    // Calculate checksum
+    float checksum = 0.0f;
+    for (int i = 0; i < n; ++i) {
+        checksum += h_output[i].real + h_output[i].imag;
+    }
+    printf("FFT 3D result checksum: %f\n", checksum);
+    
+    // Cleanup
+    err = hipFree(d_input);
+    if (err != hipSuccess) {
+        printf("Warning: hipFree d_input failed: %s\n", hipGetErrorString(err));
+    }
+    
+    err = hipFree(d_output);
+    if (err != hipSuccess) {
+        printf("Warning: hipFree d_output failed: %s\n", hipGetErrorString(err));
+    }
+    
     delete[] h_input;
     delete[] h_output;
-    hipFree(d_input);
-    hipFree(d_output);
     return 0;
 }

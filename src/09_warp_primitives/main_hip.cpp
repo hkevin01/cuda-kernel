@@ -1,4 +1,3 @@
-#define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
 #include "hip_utils.h"
 #include "timer.h"
@@ -10,17 +9,21 @@
 #include <random>
 
 // Kernel declarations - forward declarations for kernels defined in .hip files
-extern "C"
-{
-    void launchAdvancedTensorOperations(float *A, float *B, float *C, int M, int N, int K, float alpha, float beta, int blockSize, int gridSize);
-    void launchWarpPrimitivesShowcase(int *input, int *output, int *warp_results, int n, int blockSize, int gridSize);
-    void launchMultiLevelReduction(float *input, float *output, int n, int type, int blockSize, int gridSize);
-    void launchWarpMatrixTranspose(float *input, float *output, int rows, int cols, int blockSize, int gridSize);
-    void launchWarpBitonicSort(int *data, int n, int blockSize, int gridSize);
-    void launchWarpPrefixSum(float *input_float, int *input_int, float *output_float, int *output_int, long long *output_combined, int n, int blockSize, int gridSize);
-    void launchWarpOptimizedConvolution(float *input, float *filter, float *output, int width, int height, int filter_size, int blockSize, int gridSize);
-    void launchMultiWarpMatrixMul(float *A, float *B, float *C, int M, int N, int K, int blockSize, int gridSize);
-}
+__global__ void advancedTensorOperations(const float *A, const float *B, float *C,
+                                         int M, int N, int K, float alpha, float beta);
+__global__ void warpPrimitivesShowcase(const int *input, int *output, int *warp_results, int n);
+__global__ void multiLevelReduction(const float *input, float *output, int n, int reduction_type);
+__global__ void warpMatrixTranspose(const float *input, float *output, int rows, int cols);
+__global__ void warpBitonicSort(int *data, int n);
+__global__ void warpPrefixSum(const float *input_float, const int *input_int,
+                              float *output_float, int *output_int, long long *output_combined, int n);
+__global__ void warpOptimizedConvolution(const float *input, const float *filter, float *output,
+                                        int width, int height, int filter_size);
+__global__ void multiWarpMatrixMul(const float *A, const float *B, float *C, int M, int N, int K);
+__global__ void warpStringProcessing(const char *text, const char *pattern, int *matches,
+                                    int text_length, int pattern_length);
+__global__ void warpGraphTraversal(const int *adjacency_matrix, int *visited, int *distance,
+                                  int *queue, int *queue_size, int num_vertices, int current_level);
 
 class WarpPrimitivesBenchmark
 {
@@ -67,7 +70,8 @@ public:
 
         for (int i = 0; i < iterations; i++)
         {
-            launchAdvancedTensorOperations(d_A, d_B, d_C, M, N, K, alpha, beta, blockSize.x, gridSize.x);
+            hipLaunchKernelGGL(advancedTensorOperations, gridSize, blockSize, 0, 0,
+                               d_A, d_B, d_C, M, N, K, alpha, beta);
         }
 
         HIP_CHECK(hipEventRecord(stop));
@@ -132,7 +136,8 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        launchWarpPrimitivesShowcase(d_input, d_output, d_warp_results, n, blockSize, gridSize);
+        hipLaunchKernelGGL(warpPrimitivesShowcase, dim3(gridSize), dim3(blockSize), 0, 0,
+                           d_input, d_output, d_warp_results, n);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -210,7 +215,8 @@ public:
             HIP_CHECK(hipEventCreate(&stop));
 
             HIP_CHECK(hipEventRecord(start));
-            launchMultiLevelReduction(d_input, d_output, n, type, 1024, num_blocks);
+            hipLaunchKernelGGL(multiLevelReduction, dim3(num_blocks), dim3(1024), 0, 0,
+                               d_input, d_output, n, type);
             HIP_CHECK(hipEventRecord(stop));
             HIP_CHECK(hipEventSynchronize(stop));
 
@@ -284,7 +290,8 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        launchWarpMatrixTranspose(d_input, d_output, rows, cols, blockSize, gridSize);
+        hipLaunchKernelGGL(warpMatrixTranspose, dim3(gridSize), dim3(blockSize), 0, 0,
+                           d_input, d_output, rows, cols);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -351,7 +358,7 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        launchWarpBitonicSort(d_data, n, blockSize, gridSize);
+        hipLaunchKernelGGL(warpBitonicSort, dim3(gridSize), dim3(blockSize), 0, 0, d_data, n);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -420,7 +427,8 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        launchWarpPrefixSum(d_input_float, d_input_int, d_output_float, d_output_int, d_output_combined, n, blockSize, gridSize);
+        hipLaunchKernelGGL(warpPrefixSum, dim3(gridSize), dim3(blockSize), 0, 0,
+                           d_input_float, d_input_int, d_output_float, d_output_int, d_output_combined, n);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -490,7 +498,8 @@ public:
         HIP_CHECK(hipEventCreate(&stop));
 
         HIP_CHECK(hipEventRecord(start));
-        launchWarpOptimizedConvolution(d_input, d_filter, d_output, width, height, filter_size, blockSize, gridSize);
+        hipLaunchKernelGGL(warpOptimizedConvolution, dim3(gridSize), dim3(blockSize), 0, 0,
+                           d_input, d_filter, d_output, width, height, filter_size);
         HIP_CHECK(hipEventRecord(stop));
         HIP_CHECK(hipEventSynchronize(stop));
 
@@ -551,7 +560,8 @@ public:
 
         for (int i = 0; i < iterations; i++)
         {
-            launchMultiWarpMatrixMul(d_A, d_B, d_C, M, N, K, blockSize.x, gridSize.x);
+            hipLaunchKernelGGL(multiWarpMatrixMul, gridSize, blockSize, 0, 0,
+                               d_A, d_B, d_C, M, N, K);
         }
 
         HIP_CHECK(hipEventRecord(stop));

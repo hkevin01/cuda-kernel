@@ -102,12 +102,24 @@ run_gui() {
         build_project $platform
     fi
     
+    # Create logs directory
+    if [ ! -d "logs" ]; then
+        mkdir -p logs
+    fi
+    
+    # Clear previous log file
+    > logs/gui.log
+    
     print_success "Launching GPU Kernel Examples GUI..."
     print_status "Platform: $platform"
     print_status "Executable: $gui_path"
+    print_status "Log file: logs/gui.log"
     
-    # Run the GUI with platform specification
-    "$gui_path" --platform $platform "$@"
+    # Set environment variable for platform instead of command line argument
+    export GPU_PLATFORM=$platform
+    
+    # Run the GUI without platform argument (Qt will use default platform)
+    "$gui_path" "$@" 2>&1 | tee logs/gui.log
 }
 
 # Function to show help

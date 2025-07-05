@@ -40,10 +40,6 @@ int main(int argc, char *argv[])
     parser.addHelpOption();
     parser.addVersionOption();
 
-    QCommandLineOption platformOption(QStringList() << "p" << "platform",
-                                      "GPU platform to use (cuda/hip)", "platform", "hip");
-    parser.addOption(platformOption);
-
     QCommandLineOption testModeOption(QStringList() << "t" << "test-mode",
                                       "Run in test mode");
     parser.addOption(testModeOption);
@@ -57,8 +53,17 @@ int main(int argc, char *argv[])
     // Create main window
     MainWindow window;
 
-    // Set platform
-    QString platform = parser.value(platformOption);
+    // Set platform from environment variable (set by run.sh)
+    QString platform = qgetenv("GPU_PLATFORM");
+    if (platform.isEmpty())
+    {
+        // Fallback to command line argument if environment variable not set
+        QCommandLineOption platformOption(QStringList() << "p" << "platform",
+                                          "GPU platform to use (cuda/hip)", "platform", "hip");
+        parser.addOption(platformOption);
+        platform = parser.value(platformOption);
+    }
+
     if (platform == "cuda")
     {
         window.setPlatform("CUDA");

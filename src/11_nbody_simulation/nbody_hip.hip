@@ -427,26 +427,66 @@ int main() {
     const int n = 1024;
     float4* d_positions;
     float4* d_forces;
-    hipMalloc(&d_positions, n * sizeof(float4));
-    hipMalloc(&d_forces, n * sizeof(float4));
+    hipError_t err;
+    
+    // Allocate device memory
+    err = hipMalloc(&d_positions, n * sizeof(float4));
+    if (err != hipSuccess) {
+        printf("Error: hipMalloc failed for d_positions: %s\n", hipGetErrorString(err));
+        return 1;
+    }
+    
+    err = hipMalloc(&d_forces, n * sizeof(float4));
+    if (err != hipSuccess) {
+        printf("Error: hipMalloc failed for d_forces: %s\n", hipGetErrorString(err));
+        hipFree(d_positions);
+        return 1;
+    }
+    
     // Fill positions with dummy data
     float4* h_positions = new float4[n];
     for (int i = 0; i < n; ++i) h_positions[i] = {float(i), float(i%100), float(i%10), 1.0f};
-    hipMemcpy(d_positions, h_positions, n * sizeof(float4), hipMemcpyHostToDevice);
+    
+    err = hipMemcpy(d_positions, h_positions, n * sizeof(float4), hipMemcpyHostToDevice);
+    if (err != hipSuccess) {
+        printf("Error: hipMemcpy H2D failed: %s\n", hipGetErrorString(err));
+        hipFree(d_positions);
+        hipFree(d_forces);
+        delete[] h_positions;
+        return 1;
+    }
+    
     // Launch kernel
     int blockSize = 256;
     int gridSize = (n + blockSize - 1) / blockSize;
-    launchCalculateForcesOptimized(d_positions, d_forces, n, 1e-9f, blockSize, gridSize);
+    launchCalculateForcesOptimized(d_positions, d_forces, n, 0.1f, blockSize, gridSize);
+    
     // Copy result back
     float4* h_forces = new float4[n];
-    hipMemcpy(h_forces, d_forces, n * sizeof(float4), hipMemcpyDeviceToHost);
-    // Print checksum
-    double checksum = 0.0;
-    for (int i = 0; i < n; ++i) checksum += h_forces[i].x + h_forces[i].y + h_forces[i].z;
-    std::cout << "NBody checksum: " << checksum << std::endl;
+    err = hipMemcpy(h_forces, d_forces, n * sizeof(float4), hipMemcpyDeviceToHost);
+    if (err != hipSuccess) {
+        printf("Error: hipMemcpy D2H failed: %s\n", hipGetErrorString(err));
+    }
+    
+    // Calculate checksum
+    float checksum = 0.0f;
+    for (int i = 0; i < n; ++i) {
+        checksum += h_forces[i].x + h_forces[i].y + h_forces[i].z + h_forces[i].w;
+    }
+    printf("N-body simulation result checksum: %f\n", checksum);
+    
+    // Cleanup
+    err = hipFree(d_positions);
+    if (err != hipSuccess) {
+        printf("Warning: hipFree d_positions failed: %s\n", hipGetErrorString(err));
+    }
+    
+    err = hipFree(d_forces);
+    if (err != hipSuccess) {
+        printf("Warning: hipFree d_forces failed: %s\n", hipGetErrorString(err));
+    }
+    
     delete[] h_positions;
     delete[] h_forces;
-    hipFree(d_positions);
-    hipFree(d_forces);
     return 0;
 }
