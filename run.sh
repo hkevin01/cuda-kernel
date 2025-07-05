@@ -118,8 +118,25 @@ run_gui() {
     # Set environment variable for platform instead of command line argument
     export GPU_PLATFORM=$platform
     
-    # Run the GUI without platform argument (Qt will use default platform)
-    "$gui_path" "$@" 2>&1 | tee logs/gui.log
+    # Fix library path issues by explicitly using system libraries
+    # This prevents conflicts with snap-provided libraries
+    export LD_LIBRARY_PATH="/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/local/lib:$LD_LIBRARY_PATH"
+    
+    # Unset potentially conflicting snap-related variables
+    unset SNAP SNAP_COMMON SNAP_DATA SNAP_USER_COMMON SNAP_USER_DATA
+    
+    # Try to run with explicit library preloading to avoid pthread issues
+    if [ -f "/lib/x86_64-linux-gnu/libpthread.so.0" ]; then
+        export LD_PRELOAD="/lib/x86_64-linux-gnu/libpthread.so.0:/lib/x86_64-linux-gnu/libc.so.6"
+    fi
+    
+    # Run the GUI with error handling
+    if ! "$gui_path" "$@" 2>&1 | tee logs/gui.log; then
+        print_error "GUI failed to start. Check logs/gui.log for details."
+        print_warning "This might be due to library conflicts or missing dependencies."
+        print_status "Try running manually: $gui_path"
+        return 1
+    fi
 }
 
 # Function to show help

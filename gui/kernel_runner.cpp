@@ -294,23 +294,39 @@ void KernelRunner::runKernel(const QString &kernelName)
 
 QString KernelRunner::getKernelExecutable(const QString &kernelName)
 {
-    // Look for executable in build directory
-    QString buildDir = QApplication::applicationDirPath();
-    QString baseName = kernelName.toLower().replace(" ", "_");
-    QString executable = QString("%1/example_%2").arg(buildDir, baseName);
+    // Map kernel names to actual executable names
+    QMap<QString, QString> executableMap;
+    executableMap["Vector Addition"] = "01_vector_addition_hip";
+    executableMap["Matrix Multiplication"] = "02_matrix_multiplication_hip";
+    executableMap["Parallel Reduction"] = "03_parallel_reduction_hip";
+    executableMap["2D Convolution"] = "04_convolution_2d_hip";
+    executableMap["Monte Carlo"] = "05_monte_carlo_hip";
+    executableMap["Advanced FFT"] = "06_advanced_fft_hip";
+    executableMap["Advanced Threading"] = "07_advanced_threading_hip";
+    executableMap["Dynamic Memory"] = "08_dynamic_memory_hip";
+    executableMap["Warp Primitives"] = "09_warp_primitives_simplified_hip";
+    executableMap["3D FFT"] = "10_advanced_fft_hip";
+    executableMap["N-Body Simulation"] = "11_nbody_simulation_hip";
 
-    QFileInfo fileInfo(executable);
-    if (fileInfo.exists() && fileInfo.isExecutable())
-    {
-        return executable;
+    QString executableName = executableMap.value(kernelName);
+    if (executableName.isEmpty()) {
+        return QString();
     }
 
-    // Try with .exe extension on Windows
-    executable += ".exe";
-    fileInfo.setFile(executable);
-    if (fileInfo.exists() && fileInfo.isExecutable())
-    {
-        return executable;
+    // Look in multiple possible build directories
+    QStringList buildDirs = {
+        QApplication::applicationDirPath() + "/../build_hip",
+        QApplication::applicationDirPath() + "/build_hip",
+        QApplication::applicationDirPath() + "/../build",
+        QApplication::applicationDirPath() + "/build"
+    };
+
+    for (const QString &buildDir : buildDirs) {
+        QString executable = QString("%1/%2").arg(buildDir, executableName);
+        QFileInfo fileInfo(executable);
+        if (fileInfo.exists() && fileInfo.isExecutable()) {
+            return executable;
+        }
     }
 
     return QString();

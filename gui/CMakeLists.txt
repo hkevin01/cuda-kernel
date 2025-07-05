@@ -46,16 +46,12 @@ if(QT_VERSION EQUAL 6)
         Qt6::Core 
         Qt6::Widgets 
         Qt6::Charts
-        cuda_common 
-        ${GPU_RUNTIME_LIB}
     )
 else()
     target_link_libraries(gpu_kernel_gui 
         Qt5::Core 
         Qt5::Widgets 
         Qt5::Charts
-        cuda_common 
-        ${GPU_RUNTIME_LIB}
     )
 endif()
 
