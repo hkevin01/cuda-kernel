@@ -140,11 +140,11 @@ public:
 
         // Verification
         std::cout << "\n=== Results Verification ===" << std::endl;
-        bool verify1 = verifyReduction(result1, cpu_result);
-        bool verify2 = verifyReduction(result2, cpu_result);
-        bool verify3 = verifyReduction(result3, cpu_result);
-        bool verify4 = verifyReduction(result4, cpu_result);
-        bool verify5 = verifyReduction(result5, cpu_result);
+        bool verify1 = verifyReduction(result1, cpu_result, 1e-3f);
+        bool verify2 = verifyReduction(result2, cpu_result, 1e-3f);
+        bool verify3 = verifyReduction(result3, cpu_result, 1e-3f);
+        bool verify4 = verifyReduction(result4, cpu_result, 1e-3f);
+        bool verify5 = verifyReduction(result5, cpu_result, 1e-3f);
 
         std::cout << "Naive reduction: " << (verify1 ? "✓ PASS" : "✗ FAIL") << std::endl;
         std::cout << "Optimized reduction: " << (verify2 ? "✓ PASS" : "✗ FAIL") << std::endl;

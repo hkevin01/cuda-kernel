@@ -279,7 +279,9 @@ void launchSeparableConvolution(float *input, float *temp, float *output, float 
 
 }
 
-// Utility functions
+// Utility functions - wrapped for C++ linkage
+extern "C" {
+
 void createGaussianFilter(float *filter, int size, float sigma)
 {
     int radius = size / 2;
@@ -415,3 +417,5 @@ bool verifyConvolution(const float *gpu_result, const float *cpu_result,
     }
     return true;
 }
+
+} // extern "C"

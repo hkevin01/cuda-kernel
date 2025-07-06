@@ -132,7 +132,7 @@ __global__ void reduce_warp_shuffle(float *input, float *output, int n)
     // Warp-level reduction using shuffle operations
     for (int offset = 16; offset > 0; offset /= 2)
     {
-        val += __shfl_down_sync(0xffffffff, val, offset);
+        val += __shfl_down_sync(0xffffffffffffffffULL, val, offset);
     }
 
     __shared__ float warp_results[32];
@@ -154,7 +154,7 @@ __global__ void reduce_warp_shuffle(float *input, float *output, int n)
         
         for (int offset = 16; offset > 0; offset /= 2)
         {
-            val += __shfl_down_sync(0xffffffff, val, offset);
+            val += __shfl_down_sync(0xffffffffffffffffULL, val, offset);
         }
         
         if (lane_id == 0)
@@ -255,7 +255,9 @@ void launchReduceMultipleElements(float *input, float *output, int n, int blockS
 
 }
 
-// Utility functions
+// Utility functions - wrapped for C++ linkage
+extern "C" {
+
 void initializeArray(float *array, int size, bool random = true)
 {
     if (random)
@@ -291,3 +293,5 @@ bool verifyReduction(float gpu_result, float cpu_result, float tolerance = 1e-3f
     
     return relative_error < tolerance;
 }
+
+} // extern "C"

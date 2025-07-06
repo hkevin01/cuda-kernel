@@ -183,6 +183,7 @@ void MainWindow::createMenus()
 void MainWindow::createToolBars()
 {
     m_fileToolBar = addToolBar(tr("File"));
+    m_fileToolBar->setObjectName("fileToolBar");
     m_fileToolBar->addAction(m_newAct);
     m_fileToolBar->addAction(m_openAct);
     m_fileToolBar->addAction(m_saveAct);
@@ -192,6 +193,7 @@ void MainWindow::createToolBars()
     m_fileToolBar->addAction(m_pasteAct);
 
     m_kernelToolBar = addToolBar(tr("Kernel"));
+    m_kernelToolBar->setObjectName("kernelToolBar");
     m_kernelToolBar->addAction(m_runKernelAct);
     m_kernelToolBar->addAction(m_runTestsAct);
     m_kernelToolBar->addSeparator();

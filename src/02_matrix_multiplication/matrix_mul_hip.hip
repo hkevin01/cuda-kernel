@@ -164,7 +164,9 @@ void launchMatrixMulCoalesced(const float *A, const float *B, float *C,
 
 }
 
-// Matrix initialization functions
+// Matrix utility functions - wrapped for C++ linkage
+extern "C" {
+
 void initializeMatrix(float *matrix, int rows, int cols, bool random = true)
 {
     if (random)
@@ -235,3 +237,5 @@ bool verifyResult(const float *gpuResult, const float *cpuResult,
     }
     return true;
 }
+
+} // extern "C"

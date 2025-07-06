@@ -187,7 +187,7 @@ void KernelRunner::loadKernelList()
     executableMap["3D FFT"] = "fft_3d";
     executableMap["N-Body Simulation"] = "nbody_simulation";
 
-    // Note: Some executables may not be built yet
+    // Update: Most kernels are now built and available
 
     for (int i = 0; i < kernelNames.size(); ++i)
     {
@@ -298,6 +298,10 @@ void KernelRunner::runKernel(const QString &kernelName)
 
     // Check if this kernel uses the new simplified argument format
     if (kernelName == "Vector Addition" ||
+        kernelName == "Matrix Multiplication" ||
+        kernelName == "Parallel Reduction" ||
+        kernelName == "2D Convolution" ||
+        kernelName == "Monte Carlo" ||
         // kernelName == "Advanced Threading" ||  // DISABLED: Causes system crash
         kernelName == "Warp Primitives" ||
         kernelName == "Advanced FFT" ||
@@ -352,7 +356,9 @@ QString KernelRunner::getKernelExecutable(const QString &kernelName)
         QApplication::applicationDirPath() + "/" + executableName, // Same directory as GUI
         QApplication::applicationDirPath() + "/../bin/" + executableName,
         QApplication::applicationDirPath() + "/../build/bin/" + executableName,
-        QApplication::applicationDirPath() + "/../../build/bin/" + executableName};
+        QApplication::applicationDirPath() + "/../../build/bin/" + executableName,
+        QApplication::applicationDirPath() + "/../../../build/bin/" + executableName, // For build_gui/bin -> build/bin
+        "./build/bin/" + executableName}; // Absolute fallback path
 
     for (const QString &executable : searchPaths)
     {

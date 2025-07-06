@@ -189,7 +189,9 @@ void launchMonteCarloAreaEstimation(unsigned int *inside_count, float *shape_par
 
 }
 
-// Utility functions
+// Utility functions - wrapped for C++ linkage
+extern "C" {
+
 double calculatePiEstimate(const unsigned int *inside_counts, int num_threads, int samples_per_thread)
 {
     unsigned long long total_inside = 0;
@@ -246,3 +248,5 @@ double calculateAreaEstimate(const unsigned int *inside_counts, int num_threads,
     // Bounding box area is 4.0 * 3.0 = 12.0
     return ratio * 12.0;
 }
+
+} // extern "C"
