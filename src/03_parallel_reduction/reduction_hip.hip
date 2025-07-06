@@ -180,7 +180,7 @@ __global__ void reduce_multiple_elements(float *input, float *output, int n)
         i += gridSize;
     }
 
-    __shared__ float sdata[256];
+    extern __shared__ float sdata[];
     sdata[tid] = sum;
     __syncthreads();
 
@@ -198,12 +198,12 @@ __global__ void reduce_multiple_elements(float *input, float *output, int n)
     if (tid < 32)
     {
         volatile float *vmem = sdata;
-        vmem[tid] += vmem[tid + 32];
-        vmem[tid] += vmem[tid + 16];
-        vmem[tid] += vmem[tid + 8];
-        vmem[tid] += vmem[tid + 4];
-        vmem[tid] += vmem[tid + 2];
-        vmem[tid] += vmem[tid + 1];
+        if (tid + 32 < blockDim.x) vmem[tid] += vmem[tid + 32];
+        if (tid + 16 < blockDim.x) vmem[tid] += vmem[tid + 16];
+        if (tid + 8 < blockDim.x) vmem[tid] += vmem[tid + 8];
+        if (tid + 4 < blockDim.x) vmem[tid] += vmem[tid + 4];
+        if (tid + 2 < blockDim.x) vmem[tid] += vmem[tid + 2];
+        if (tid + 1 < blockDim.x) vmem[tid] += vmem[tid + 1];
     }
 
     if (tid == 0)
@@ -248,7 +248,8 @@ void launchReduceWarpShuffle(float *input, float *output, int n, int blockSize, 
 
 void launchReduceMultipleElements(float *input, float *output, int n, int blockSize, int gridSize)
 {
-    hipLaunchKernelGGL(reduce_multiple_elements, dim3(gridSize), dim3(blockSize), 0, 0,
+    int sharedMemSize = blockSize * sizeof(float);
+    hipLaunchKernelGGL(reduce_multiple_elements, dim3(gridSize), dim3(blockSize), sharedMemSize, 0,
                        input, output, n);
     HIP_CHECK(hipDeviceSynchronize());
 }

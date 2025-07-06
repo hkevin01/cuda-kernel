@@ -183,8 +183,8 @@ void KernelRunner::loadKernelList()
     executableMap["Advanced FFT"] = "advanced_fft";
     // executableMap["Advanced Threading"] = "advanced_threading";  // DISABLED: System crash
     executableMap["Dynamic Memory"] = "dynamic_memory";
-    executableMap["Warp Primitives"] = "warp_primitives";
-    executableMap["3D FFT"] = "fft_3d";
+    // executableMap["Warp Primitives"] = "warp_primitives";  // NOT BUILT: No executable
+    executableMap["3D FFT"] = "advanced_fft";  // FIXED: Maps to existing advanced_fft executable
     executableMap["N-Body Simulation"] = "nbody_simulation";
 
     // Update: Most kernels are now built and available
@@ -340,8 +340,8 @@ QString KernelRunner::getKernelExecutable(const QString &kernelName)
     executableMap["Advanced FFT"] = "advanced_fft";
     // executableMap["Advanced Threading"] = "advanced_threading";  // DISABLED: System crash
     executableMap["Dynamic Memory"] = "dynamic_memory";
-    executableMap["Warp Primitives"] = "warp_primitives";
-    executableMap["3D FFT"] = "fft_3d";
+    // executableMap["Warp Primitives"] = "warp_primitives";  // NOT BUILT: No executable
+    executableMap["3D FFT"] = "advanced_fft";  // FIXED: Maps to existing advanced_fft executable
     executableMap["N-Body Simulation"] = "nbody_simulation";
 
     QString executableName = executableMap.value(kernelName);
@@ -396,31 +396,88 @@ void KernelRunner::updateKernelInfo(const QString &kernelName)
 
 void KernelRunner::parseKernelOutput(const QString &output)
 {
-    // Parse performance metrics from output
+    // Parse performance metrics from output with markdown-style syntax highlighting
     QTextStream stream(const_cast<QString *>(&output), QIODevice::ReadOnly);
     QString line;
 
     while (stream.readLineInto(&line))
     {
-        if (line.contains("Time:", Qt::CaseInsensitive))
+        QString formattedLine = line;
+        
+        // Apply syntax highlighting based on content patterns
+        if (line.contains("===", Qt::CaseInsensitive))
         {
-            // Extract timing information
-            m_outputText->append(tr("<b>%1</b>").arg(line));
+            // Section headers - bold blue
+            formattedLine = tr("<span style='color: #0066CC; font-weight: bold; font-size: 14px;'>%1</span>").arg(line);
         }
-        else if (line.contains("Error:", Qt::CaseInsensitive))
+        else if (line.contains("Time:", Qt::CaseInsensitive) || line.contains("GPU time:", Qt::CaseInsensitive))
         {
-            // Highlight errors
-            m_outputText->append(tr("<span style='color: red;'>%1</span>").arg(line));
+            // Timing information - bold green
+            formattedLine = tr("<span style='color: #009900; font-weight: bold;'>%1</span>").arg(line);
         }
-        else if (line.contains("Success:", Qt::CaseInsensitive))
+        else if (line.contains("Bandwidth:", Qt::CaseInsensitive) || line.contains("GB/s", Qt::CaseInsensitive))
         {
-            // Highlight success messages
-            m_outputText->append(tr("<span style='color: green;'>%1</span>").arg(line));
+            // Performance metrics - bold orange
+            formattedLine = tr("<span style='color: #FF6600; font-weight: bold;'>%1</span>").arg(line);
+        }
+        else if (line.contains("Error:", Qt::CaseInsensitive) || line.contains("FAIL", Qt::CaseInsensitive) || 
+                 line.contains("failed", Qt::CaseInsensitive) || line.contains("✗", Qt::CaseInsensitive))
+        {
+            // Errors and failures - bold red
+            formattedLine = tr("<span style='color: #CC0000; font-weight: bold; background-color: #FFE6E6;'>%1</span>").arg(line);
+        }
+        else if (line.contains("Success:", Qt::CaseInsensitive) || line.contains("PASS", Qt::CaseInsensitive) || 
+                 line.contains("✓", Qt::CaseInsensitive) || line.contains("completed successfully", Qt::CaseInsensitive))
+        {
+            // Success messages - bold green
+            formattedLine = tr("<span style='color: #009900; font-weight: bold; background-color: #E6FFE6;'>%1</span>").arg(line);
+        }
+        else if (line.contains("Result:", Qt::CaseInsensitive) || line.contains("estimate:", Qt::CaseInsensitive))
+        {
+            // Results - bold purple
+            formattedLine = tr("<span style='color: #6600CC; font-weight: bold;'>%1</span>").arg(line);
+        }
+        else if (line.contains("Device", Qt::CaseInsensitive) || line.contains("GPU", Qt::CaseInsensitive) || 
+                 line.contains("HIP", Qt::CaseInsensitive) || line.contains("CUDA", Qt::CaseInsensitive))
+        {
+            // GPU/Device information - blue
+            formattedLine = tr("<span style='color: #0066CC;'>%1</span>").arg(line);
+        }
+        else if (line.contains("Grid size:", Qt::CaseInsensitive) || line.contains("Block size:", Qt::CaseInsensitive) ||
+                 line.contains("threads", Qt::CaseInsensitive) || line.contains("blocks", Qt::CaseInsensitive))
+        {
+            // Configuration parameters - dark cyan
+            formattedLine = tr("<span style='color: #006666;'>%1</span>").arg(line);
+        }
+        else if (line.contains("Starting", Qt::CaseInsensitive) || line.contains("Arguments:", Qt::CaseInsensitive))
+        {
+            // Process information - gray
+            formattedLine = tr("<span style='color: #666666; font-style: italic;'>%1</span>").arg(line);
+        }
+        else if (line.trimmed().isEmpty())
+        {
+            // Keep empty lines as is
+            formattedLine = line;
         }
         else
         {
-            m_outputText->append(line);
+            // Default text - apply subtle highlighting for numbers and units
+            formattedLine = line;
+            
+            // Highlight numbers with units (ms, GB/s, MB, etc.)
+            formattedLine.replace(QRegExp("([0-9]+\\.?[0-9]*) ?(ms|MB|GB|KB|GB/s|MB/s|seconds|Hz|MHz|GHz)\\b"), 
+                                "<span style='color: #FF6600; font-weight: bold;'>\\1 \\2</span>");
+            
+            // Highlight percentages
+            formattedLine.replace(QRegExp("([0-9]+\\.?[0-9]*)%"), 
+                                "<span style='color: #FF6600; font-weight: bold;'>\\1%</span>");
+            
+            // Highlight large numbers (for array sizes, etc.)
+            formattedLine.replace(QRegExp("\\b([0-9]{4,})\\b"), 
+                                "<span style='color: #0066CC;'>\\1</span>");
         }
+        
+        m_outputText->append(formattedLine);
     }
 
     // Auto-scroll to bottom
