@@ -132,14 +132,56 @@ elseif(USE_HIP)
 endif()
 target_link_libraries(vector_addition cuda_common ${GPU_RUNTIME_LIB})
 
-# Note: Examples 2-5 don't have HIP versions yet, so they're skipped for HIP builds
+# Example 2: Matrix Multiplication (has HIP version)
+if(USE_CUDA)
+    # Skip for now - no CUDA version
+elseif(USE_HIP)
+    add_executable(matrix_multiplication
+        src/02_matrix_multiplication/matrix_mul_hip.hip
+        src/02_matrix_multiplication/main_hip.cpp
+    )
+    target_link_libraries(matrix_multiplication cuda_common ${GPU_RUNTIME_LIB})
+endif()
+
+# Example 3: Parallel Reduction (has HIP version)
+if(USE_CUDA)
+    # Skip for now - no CUDA version
+elseif(USE_HIP)
+    add_executable(parallel_reduction
+        src/03_parallel_reduction/reduction_hip.hip
+        src/03_parallel_reduction/main_hip.cpp
+    )
+    target_link_libraries(parallel_reduction cuda_common ${GPU_RUNTIME_LIB})
+endif()
+
+# Example 4: 2D Convolution (has HIP version)
+if(USE_CUDA)
+    # Skip for now - no CUDA version
+elseif(USE_HIP)
+    add_executable(convolution_2d
+        src/04_convolution_2d/convolution_hip.hip
+        src/04_convolution_2d/main_hip.cpp
+    )
+    target_link_libraries(convolution_2d cuda_common ${GPU_RUNTIME_LIB})
+endif()
+
+# Example 5: Monte Carlo (has HIP version)
+if(USE_CUDA)
+    # Skip for now - no CUDA version
+elseif(USE_HIP)
+    add_executable(monte_carlo
+        src/05_monte_carlo/monte_carlo_hip.hip
+        src/05_monte_carlo/main_hip.cpp
+    )
+    target_link_libraries(monte_carlo cuda_common ${GPU_RUNTIME_LIB})
+endif()
 
 # Example 7: Advanced Threading (has HIP version)
 if(USE_CUDA)
     # Skip for now - no CUDA version
 elseif(USE_HIP)
     add_executable(advanced_threading
-        src/07_advanced_threading/advanced_threading_hip.hip
+        src/07_advanced_threading/advanced_threading_hip_simplified.hip
         src/07_advanced_threading/main_hip.cpp
     )
     target_link_libraries(advanced_threading cuda_common ${GPU_RUNTIME_LIB})
@@ -200,6 +242,10 @@ if(USE_CUDA)
 elseif(USE_HIP)
     install(TARGETS 
         vector_addition 
+        matrix_multiplication
+        parallel_reduction
+        convolution_2d
+        monte_carlo
         advanced_threading
         dynamic_memory
         warp_primitives

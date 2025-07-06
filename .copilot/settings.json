@@ -1,0 +1,20 @@
+{
+  // Copilot workspace-specific settings
+  "github.copilot.chat.welcomeMessage": "never",
+  "github.copilot.chat.iterativeImprovement": false,
+  "github.copilot.chat.confirmBeforeRunning": false,
+  "github.copilot.chat.confirmBeforeEditing": false,
+  "github.copilot.chat.autoExecute": true,
+  "github.copilot.chat.followUpQuestions": false,
+  "github.copilot.chat.verboseOutput": false,
+  "github.copilot.chat.continuePrompting": false,
+  "github.copilot.advanced.enableExtensiveLogging": false,
+  "github.copilot.chat.experimental.continueConversation": true,
+  "github.copilot.chat.localeOverride": "en",
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  }
+}

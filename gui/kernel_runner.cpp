@@ -172,7 +172,22 @@ void KernelRunner::loadKernelList()
 
     QStringList categories = {
         "Basic", "Basic", "Basic", "Basic", "Basic",
-        "Advanced", "Advanced", "Advanced", "Advanced", "Advanced", "Advanced"};
+        "Advanced", "Advanced", "Advanced", "Advanced", "Advanced", "Advanced"}; // Map display names to actual executable names
+    // These correspond to executables in build/bin/
+    QMap<QString, QString> executableMap;
+    executableMap["Vector Addition"] = "vector_addition";
+    executableMap["Advanced Threading"] = "advanced_threading";
+    executableMap["Warp Primitives"] = "warp_primitives";
+    executableMap["Advanced FFT"] = "advanced_fft";
+    executableMap["Dynamic Memory"] = "dynamic_memory";
+    executableMap["N-Body Simulation"] = "nbody_simulation";
+
+    // Future executables (not yet built):
+    // executableMap["Matrix Multiplication"] = "matrix_multiplication";
+    // executableMap["Parallel Reduction"] = "parallel_reduction";
+    // executableMap["2D Convolution"] = "convolution_2d";
+    // executableMap["Monte Carlo"] = "monte_carlo";
+    // executableMap["3D FFT"] = "fft_3d";
 
     for (int i = 0; i < kernelNames.size(); ++i)
     {
@@ -181,18 +196,20 @@ void KernelRunner::loadKernelList()
         info.description = descriptions[i];
         info.category = categories[i];
 
-        // Set executable name based on platform
-        QString baseName = kernelNames[i].toLower().replace(" ", "_");
-        info.executable = QString("example_%1").arg(baseName);
+        // Set executable name from mapping (empty if not available)
+        info.executable = executableMap.value(kernelNames[i], "");
 
-        // Add parameters
-        info.parameters << "--iterations" << "10";
-        info.parameters << "--size" << "10000";
+        // No hard-coded parameters - they're handled dynamically in runKernel()
+        // info.parameters is now empty and will be set at runtime based on UI values
 
         m_kernels[info.name] = info;
 
-        // Add to list with category prefix
+        // Add to list with category prefix, and note if not available
         QString displayName = QString("[%1] %2").arg(info.category, info.name);
+        if (info.executable.isEmpty())
+        {
+            displayName += " (Not Built)";
+        }
         QListWidgetItem *item = new QListWidgetItem(displayName);
         item->setData(Qt::UserRole, info.name);
         m_kernelList->addItem(item);
@@ -275,15 +292,29 @@ void KernelRunner::runKernel(const QString &kernelName)
     connect(m_currentProcess, &QProcess::readyReadStandardError,
             this, &KernelRunner::onProcessOutput);
 
-    // Prepare arguments
+    // Prepare arguments based on kernel type
     QStringList arguments;
-    arguments << "--iterations" << QString::number(m_iterationsSpinBox->value());
-    arguments << "--size" << QString::number(m_dataSizeSpinBox->value());
-    arguments << "--platform" << m_platformComboBox->currentText();
-
-    // Add kernel-specific parameters
     KernelInfo &info = m_kernels[kernelName];
-    arguments << info.parameters;
+
+    // Check if this kernel uses the new simplified argument format
+    if (kernelName == "Vector Addition" ||
+        kernelName == "Advanced Threading" ||
+        kernelName == "Warp Primitives" ||
+        kernelName == "Advanced FFT" ||
+        kernelName == "Dynamic Memory" ||
+        kernelName == "N-Body Simulation")
+    {
+        // Use only the size parameter as positional argument
+        arguments << QString::number(m_dataSizeSpinBox->value());
+    }
+    else
+    {
+        // Use the old format for future kernels
+        arguments << "--iterations" << QString::number(m_iterationsSpinBox->value());
+        arguments << "--size" << QString::number(m_dataSizeSpinBox->value());
+        arguments << "--platform" << m_platformComboBox->currentText();
+        arguments << info.parameters;
+    }
 
     // Start process
     m_outputText->append(tr("Starting %1...\n").arg(executable));
@@ -295,18 +326,21 @@ void KernelRunner::runKernel(const QString &kernelName)
 QString KernelRunner::getKernelExecutable(const QString &kernelName)
 {
     // Map kernel names to actual executable names
+    // These correspond to executables in build/bin/
     QMap<QString, QString> executableMap;
-    executableMap["Vector Addition"] = "01_vector_addition_hip";
-    executableMap["Matrix Multiplication"] = "02_matrix_multiplication_hip";
-    executableMap["Parallel Reduction"] = "03_parallel_reduction_hip";
-    executableMap["2D Convolution"] = "04_convolution_2d_hip";
-    executableMap["Monte Carlo"] = "05_monte_carlo_hip";
-    executableMap["Advanced FFT"] = "06_advanced_fft_hip";
-    executableMap["Advanced Threading"] = "07_advanced_threading_hip";
-    executableMap["Dynamic Memory"] = "08_dynamic_memory_hip";
-    executableMap["Warp Primitives"] = "09_warp_primitives_simplified_hip";
-    executableMap["3D FFT"] = "10_advanced_fft_hip";
-    executableMap["N-Body Simulation"] = "11_nbody_simulation_hip";
+    executableMap["Vector Addition"] = "vector_addition";
+    executableMap["Advanced Threading"] = "advanced_threading";
+    executableMap["Warp Primitives"] = "warp_primitives";
+    executableMap["Advanced FFT"] = "advanced_fft";
+    executableMap["Dynamic Memory"] = "dynamic_memory";
+    executableMap["N-Body Simulation"] = "nbody_simulation";
+
+    // Future executables (not yet built):
+    // executableMap["Matrix Multiplication"] = "matrix_multiplication";
+    // executableMap["Parallel Reduction"] = "parallel_reduction";
+    // executableMap["2D Convolution"] = "convolution_2d";
+    // executableMap["Monte Carlo"] = "monte_carlo";
+    // executableMap["3D FFT"] = "fft_3d";
 
     QString executableName = executableMap.value(kernelName);
     if (executableName.isEmpty())
@@ -314,16 +348,16 @@ QString KernelRunner::getKernelExecutable(const QString &kernelName)
         return QString();
     }
 
-    // Look in multiple possible build directories
-    QStringList buildDirs = {
-        QApplication::applicationDirPath() + "/../build_hip",
-        QApplication::applicationDirPath() + "/build_hip",
-        QApplication::applicationDirPath() + "/../build",
-        QApplication::applicationDirPath() + "/build"};
+    // Look in the same directory as the GUI executable (build/bin)
+    // and also check relative paths from there
+    QStringList searchPaths = {
+        QApplication::applicationDirPath() + "/" + executableName, // Same directory as GUI
+        QApplication::applicationDirPath() + "/../bin/" + executableName,
+        QApplication::applicationDirPath() + "/../build/bin/" + executableName,
+        QApplication::applicationDirPath() + "/../../build/bin/" + executableName};
 
-    for (const QString &buildDir : buildDirs)
+    for (const QString &executable : searchPaths)
     {
-        QString executable = QString("%1/%2").arg(buildDir, executableName);
         QFileInfo fileInfo(executable);
         if (fileInfo.exists() && fileInfo.isExecutable())
         {
@@ -407,6 +441,19 @@ void KernelRunner::onKernelSelectionChanged()
     {
         QString kernelName = currentItem->data(Qt::UserRole).toString();
         updateKernelInfo(kernelName);
+
+        // Enable/disable run button based on whether executable exists
+        bool hasExecutable = !m_kernels[kernelName].executable.isEmpty();
+        m_runButton->setEnabled(hasExecutable && !m_isRunning);
+
+        if (!hasExecutable)
+        {
+            m_statusLabel->setText(tr("Kernel not built - executable not available"));
+        }
+        else
+        {
+            m_statusLabel->setText(tr("Ready"));
+        }
     }
 }
 
