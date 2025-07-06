@@ -176,18 +176,18 @@ void KernelRunner::loadKernelList()
     // These correspond to executables in build/bin/
     QMap<QString, QString> executableMap;
     executableMap["Vector Addition"] = "vector_addition";
-    executableMap["Advanced Threading"] = "advanced_threading";
-    executableMap["Warp Primitives"] = "warp_primitives";
+    executableMap["Matrix Multiplication"] = "matrix_multiplication";
+    executableMap["Parallel Reduction"] = "parallel_reduction";
+    executableMap["2D Convolution"] = "convolution_2d";
+    executableMap["Monte Carlo"] = "monte_carlo";
     executableMap["Advanced FFT"] = "advanced_fft";
+    // executableMap["Advanced Threading"] = "advanced_threading";  // DISABLED: System crash
     executableMap["Dynamic Memory"] = "dynamic_memory";
+    executableMap["Warp Primitives"] = "warp_primitives";
+    executableMap["3D FFT"] = "fft_3d";
     executableMap["N-Body Simulation"] = "nbody_simulation";
 
-    // Future executables (not yet built):
-    // executableMap["Matrix Multiplication"] = "matrix_multiplication";
-    // executableMap["Parallel Reduction"] = "parallel_reduction";
-    // executableMap["2D Convolution"] = "convolution_2d";
-    // executableMap["Monte Carlo"] = "monte_carlo";
-    // executableMap["3D FFT"] = "fft_3d";
+    // Note: Some executables may not be built yet
 
     for (int i = 0; i < kernelNames.size(); ++i)
     {
@@ -298,7 +298,7 @@ void KernelRunner::runKernel(const QString &kernelName)
 
     // Check if this kernel uses the new simplified argument format
     if (kernelName == "Vector Addition" ||
-        kernelName == "Advanced Threading" ||
+        // kernelName == "Advanced Threading" ||  // DISABLED: Causes system crash
         kernelName == "Warp Primitives" ||
         kernelName == "Advanced FFT" ||
         kernelName == "Dynamic Memory" ||
@@ -329,18 +329,16 @@ QString KernelRunner::getKernelExecutable(const QString &kernelName)
     // These correspond to executables in build/bin/
     QMap<QString, QString> executableMap;
     executableMap["Vector Addition"] = "vector_addition";
-    executableMap["Advanced Threading"] = "advanced_threading";
-    executableMap["Warp Primitives"] = "warp_primitives";
+    executableMap["Matrix Multiplication"] = "matrix_multiplication";
+    executableMap["Parallel Reduction"] = "parallel_reduction";
+    executableMap["2D Convolution"] = "convolution_2d";
+    executableMap["Monte Carlo"] = "monte_carlo";
     executableMap["Advanced FFT"] = "advanced_fft";
+    // executableMap["Advanced Threading"] = "advanced_threading";  // DISABLED: System crash
     executableMap["Dynamic Memory"] = "dynamic_memory";
+    executableMap["Warp Primitives"] = "warp_primitives";
+    executableMap["3D FFT"] = "fft_3d";
     executableMap["N-Body Simulation"] = "nbody_simulation";
-
-    // Future executables (not yet built):
-    // executableMap["Matrix Multiplication"] = "matrix_multiplication";
-    // executableMap["Parallel Reduction"] = "parallel_reduction";
-    // executableMap["2D Convolution"] = "convolution_2d";
-    // executableMap["Monte Carlo"] = "monte_carlo";
-    // executableMap["3D FFT"] = "fft_3d";
 
     QString executableName = executableMap.value(kernelName);
     if (executableName.isEmpty())
