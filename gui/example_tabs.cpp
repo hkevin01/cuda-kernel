@@ -9,6 +9,161 @@
 #include <QSyntaxHighlighter>
 #include <QTextCharFormat>
 #include <QFont>
+#include <QRegularExpression>
+#include <QDialog>
+#include <QClipboard>
+
+// C++/CUDA Syntax Highlighter
+class CppSyntaxHighlighter : public QSyntaxHighlighter
+{
+    Q_OBJECT
+
+public:
+    explicit CppSyntaxHighlighter(QTextDocument *parent = nullptr);
+
+protected:
+    void highlightBlock(const QString &text) override;
+
+private:
+    struct HighlightingRule
+    {
+        QRegularExpression pattern;
+        QTextCharFormat format;
+    };
+    QVector<HighlightingRule> highlightingRules;
+
+    QRegularExpression commentStartExpression;
+    QRegularExpression commentEndExpression;
+
+    QTextCharFormat xmlElementFormat;
+    QTextCharFormat xmlCommentFormat;
+    QTextCharFormat xmlValueFormat;
+    QTextCharFormat xmlCommentEndFormat;
+};
+
+CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument *parent)
+    : QSyntaxHighlighter(parent)
+{
+    HighlightingRule rule;
+
+    // Keyword format
+    QTextCharFormat keywordFormat;
+    keywordFormat.setColor(QColor(86, 156, 214)); // Blue
+    keywordFormat.setFontWeight(QFont::Bold);
+    QStringList keywordPatterns;
+    keywordPatterns << "\\bauto\\b" << "\\bbool\\b" << "\\bbreak\\b" << "\\bcase\\b"
+                    << "\\bchar\\b" << "\\bclass\\b" << "\\bconst\\b" << "\\bcontinue\\b"
+                    << "\\bdefault\\b" << "\\bdo\\b" << "\\bdouble\\b" << "\\belse\\b"
+                    << "\\benum\\b" << "\\bexplicit\\b" << "\\bextern\\b" << "\\bfalse\\b"
+                    << "\\bfloat\\b" << "\\bfor\\b" << "\\bfriend\\b" << "\\bif\\b"
+                    << "\\binline\\b" << "\\bint\\b" << "\\blong\\b" << "\\bnamespace\\b"
+                    << "\\bnew\\b" << "\\boperator\\b" << "\\bprivate\\b" << "\\bprotected\\b"
+                    << "\\bpublic\\b" << "\\breturn\\b" << "\\bshort\\b" << "\\bsigned\\b"
+                    << "\\bsizeof\\b" << "\\bstatic\\b" << "\\bstruct\\b" << "\\bswitch\\b"
+                    << "\\btemplate\\b" << "\\bthis\\b" << "\\bthrow\\b" << "\\btrue\\b"
+                    << "\\btry\\b" << "\\btypedef\\b" << "\\btypename\\b" << "\\bunion\\b"
+                    << "\\bunsigned\\b" << "\\bvirtual\\b" << "\\bvoid\\b" << "\\bvolatile\\b"
+                    << "\\bwhile\\b";
+
+    // CUDA/HIP specific keywords
+    keywordPatterns << "\\b__global__\\b" << "\\b__device__\\b" << "\\b__host__\\b"
+                    << "\\b__shared__\\b" << "\\b__constant__\\b" << "\\b__managed__\\b"
+                    << "\\b__restrict__\\b" << "\\bthreadIdx\\b" << "\\bblockIdx\\b"
+                    << "\\bblockDim\\b" << "\\bgridDim\\b" << "\\b__syncthreads\\b"
+                    << "\\b__syncwarp\\b" << "\\bhipMalloc\\b" << "\\bhipMemcpy\\b"
+                    << "\\bhipFree\\b" << "\\bcudaMalloc\\b" << "\\bcudaMemcpy\\b"
+                    << "\\bcudaFree\\b" << "\\b__shfl_down\\b" << "\\b__shfl_up\\b"
+                    << "\\b__ballot\\b" << "\\b__any\\b" << "\\b__all\\b";
+
+    foreach (const QString &pattern, keywordPatterns) {
+        rule.pattern = QRegularExpression(pattern);
+        rule.format = keywordFormat;
+        highlightingRules.append(rule);
+    }
+
+    // Class format
+    QTextCharFormat classFormat;
+    classFormat.setFontWeight(QFont::Bold);
+    classFormat.setColor(QColor(78, 201, 176)); // Teal
+    rule.pattern = QRegularExpression(QStringLiteral("\\bQ[A-Za-z]+\\b"));
+    rule.format = classFormat;
+    highlightingRules.append(rule);
+
+    // Function format
+    QTextCharFormat functionFormat;
+    functionFormat.setColor(QColor(220, 220, 170)); // Light yellow
+    rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
+    rule.format = functionFormat;
+    highlightingRules.append(rule);
+
+    // String format
+    QTextCharFormat quotationFormat;
+    quotationFormat.setColor(QColor(206, 145, 120)); // Orange/brown
+    rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
+    rule.format = quotationFormat;
+    highlightingRules.append(rule);
+
+    // Single line comment format
+    QTextCharFormat singleLineCommentFormat;
+    singleLineCommentFormat.setColor(QColor(106, 153, 85)); // Green
+    rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
+    rule.format = singleLineCommentFormat;
+    highlightingRules.append(rule);
+
+    // Multi-line comment format
+    xmlCommentFormat.setColor(QColor(106, 153, 85)); // Green
+    commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
+    commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
+
+    // Preprocessor format
+    QTextCharFormat preprocessorFormat;
+    preprocessorFormat.setColor(QColor(155, 155, 155)); // Gray
+    rule.pattern = QRegularExpression(QStringLiteral("^\\s*#[^\n]*"));
+    rule.format = preprocessorFormat;
+    highlightingRules.append(rule);
+
+    // Number format
+    QTextCharFormat numberFormat;
+    numberFormat.setColor(QColor(181, 206, 168)); // Light green
+    rule.pattern = QRegularExpression(QStringLiteral("\\b[0-9]+\\.?[0-9]*[fF]?\\b"));
+    rule.format = numberFormat;
+    highlightingRules.append(rule);
+}
+
+void CppSyntaxHighlighter::highlightBlock(const QString &text)
+{
+    foreach (const HighlightingRule &rule, highlightingRules) {
+        QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
+        while (matchIterator.hasNext()) {
+            QRegularExpressionMatch match = matchIterator.next();
+            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+        }
+    }
+
+    // Handle multi-line comments
+    setCurrentBlockState(0);
+
+    QRegularExpressionMatch startMatch = commentStartExpression.match(text);
+    int commentLength = 0;
+
+    if (previousBlockState() != 1)
+        commentLength = startMatch.capturedStart();
+    else
+        commentLength = 0;
+
+    while (commentLength >= 0) {
+        QRegularExpressionMatch endMatch = commentEndExpression.match(text, commentLength);
+        int endIndex = endMatch.capturedStart();
+        if (endIndex == -1) {
+            setCurrentBlockState(1);
+            commentLength = text.length() - commentLength;
+        } else {
+            commentLength = endIndex - commentLength + endMatch.capturedLength();
+        }
+        setFormat(commentLength, commentLength, xmlCommentFormat);
+        commentLength = commentStartExpression.match(text, commentLength + commentLength).capturedStart();
+    }
+}
 
 ExampleTab::ExampleTab(const QString &name, const QString &description, QWidget *parent)
     : QWidget(parent), m_name(name), m_description(description), m_process(nullptr), m_isRunning(false)
@@ -147,20 +302,52 @@ void ExampleTab::showSourceCode()
 
     QDialog *dialog = new QDialog(this);
     dialog->setWindowTitle(tr("Source Code - %1").arg(m_name));
-    dialog->resize(800, 600);
+    dialog->resize(1000, 700);
 
     QVBoxLayout *layout = new QVBoxLayout(dialog);
 
     QTextEdit *sourceView = new QTextEdit();
     sourceView->setReadOnly(true);
     sourceView->setPlainText(m_sourceCode);
-    sourceView->setFont(QFont("Courier", 10));
+    
+    // Set font and styling
+    QFont font("Consolas", 11);
+    if (!font.exactMatch()) {
+        font.setFamily("Courier New");
+    }
+    sourceView->setFont(font);
+    
+    // Apply dark theme styling for better code visibility
+    sourceView->setStyleSheet(
+        "QTextEdit {"
+        "    background-color: #1e1e1e;"
+        "    color: #d4d4d4;"
+        "    border: 1px solid #464647;"
+        "    selection-background-color: #264f78;"
+        "}"
+    );
+
+    // Apply syntax highlighting
+    CppSyntaxHighlighter *highlighter = new CppSyntaxHighlighter(sourceView->document());
 
     layout->addWidget(sourceView);
 
+    // Add button layout
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *copyButton = new QPushButton(tr("Copy to Clipboard"));
     QPushButton *closeButton = new QPushButton(tr("Close"));
+    
+    buttonLayout->addWidget(copyButton);
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(closeButton);
+    
+    layout->addLayout(buttonLayout);
+
+    // Connect signals
+    connect(copyButton, &QPushButton::clicked, [sourceView]() {
+        QApplication::clipboard()->setText(sourceView->toPlainText());
+    });
     connect(closeButton, &QPushButton::clicked, dialog, &QDialog::accept);
-    layout->addWidget(closeButton);
 
     dialog->exec();
     dialog->deleteLater();
@@ -710,3 +897,6 @@ void ExampleTabs::showExampleSource(const QString &exampleName)
         m_exampleTabs[exampleName]->showSourceCode();
     }
 }
+
+// Include the moc file for the syntax highlighter
+#include "example_tabs.moc"

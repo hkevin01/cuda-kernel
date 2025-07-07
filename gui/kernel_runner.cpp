@@ -120,6 +120,31 @@ void KernelRunner::setupUI()
     m_outputText = new QTextEdit();
     m_outputText->setReadOnly(true);
     m_outputText->setMaximumHeight(200);
+    
+    // Set monospace font for better code readability
+    QFont monospaceFont("Consolas", 9);
+    if (!monospaceFont.exactMatch()) {
+        monospaceFont.setFamily("Monaco");  // macOS
+        if (!monospaceFont.exactMatch()) {
+            monospaceFont.setFamily("Liberation Mono");  // Linux
+            if (!monospaceFont.exactMatch()) {
+                monospaceFont.setFamily("Courier New");  // Fallback
+            }
+        }
+    }
+    monospaceFont.setStyleHint(QFont::Monospace);
+    m_outputText->setFont(monospaceFont);
+    
+    // Set background color and improve readability
+    m_outputText->setStyleSheet(
+        "QTextEdit {"
+        "    background-color: #f8f8f8;"
+        "    border: 1px solid #cccccc;"
+        "    padding: 5px;"
+        "    line-height: 1.2;"
+        "}"
+    );
+    
     outputLayout->addWidget(m_outputText);
 
     QHBoxLayout *statusLayout = new QHBoxLayout();
@@ -321,8 +346,10 @@ void KernelRunner::runKernel(const QString &kernelName)
     }
 
     // Start process
-    m_outputText->append(tr("Starting %1...\n").arg(executable));
-    m_outputText->append(tr("Arguments: %1\n\n").arg(arguments.join(" ")));
+    m_outputText->append(tr("<span style='color: #0066CC; font-weight: bold; font-size: 12px;'>🚀 Starting %1...</span>").arg(QFileInfo(executable).baseName()));
+    m_outputText->append(tr("<span style='color: #666666; font-style: italic;'>📁 Executable: %1</span>").arg(executable));
+    m_outputText->append(tr("<span style='color: #666666; font-style: italic;'>⚙️  Arguments: %1</span>").arg(arguments.join(" ")));
+    m_outputText->append(""); // Empty line for spacing
 
     m_currentProcess->start(executable, arguments);
 }
@@ -464,17 +491,13 @@ void KernelRunner::parseKernelOutput(const QString &output)
             // Default text - apply subtle highlighting for numbers and units
             formattedLine = line;
             
-            // Highlight numbers with units (ms, GB/s, MB, etc.)
-            formattedLine.replace(QRegExp("([0-9]+\\.?[0-9]*) ?(ms|MB|GB|KB|GB/s|MB/s|seconds|Hz|MHz|GHz)\\b"), 
-                                "<span style='color: #FF6600; font-weight: bold;'>\\1 \\2</span>");
-            
-            // Highlight percentages
-            formattedLine.replace(QRegExp("([0-9]+\\.?[0-9]*)%"), 
-                                "<span style='color: #FF6600; font-weight: bold;'>\\1%</span>");
-            
-            // Highlight large numbers (for array sizes, etc.)
-            formattedLine.replace(QRegExp("\\b([0-9]{4,})\\b"), 
-                                "<span style='color: #0066CC;'>\\1</span>");
+            // Highlight numbers with units and common patterns
+            if (line.contains("ms") || line.contains("GB/s") || line.contains("MB") || 
+                line.contains("Hz") || line.contains("%") || line.contains("seconds"))
+            {
+                // Apply basic number highlighting for performance metrics
+                formattedLine = tr("<span style='color: #FF6600;'>%1</span>").arg(line);
+            }
         }
         
         m_outputText->append(formattedLine);
