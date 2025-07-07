@@ -328,8 +328,9 @@ void KernelRunner::runKernel(const QString &kernelName)
         kernelName == "2D Convolution" ||
         kernelName == "Monte Carlo" ||
         // kernelName == "Advanced Threading" ||  // DISABLED: Causes system crash
-        kernelName == "Warp Primitives" ||
+        // kernelName == "Warp Primitives" ||  // DISABLED: Not built
         kernelName == "Advanced FFT" ||
+        kernelName == "3D FFT" ||  // ADDED: Maps to advanced_fft executable
         kernelName == "Dynamic Memory" ||
         kernelName == "N-Body Simulation")
     {
