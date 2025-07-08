@@ -1,11 +1,8 @@
 #define HIP_ENABLE_WARP_SYNC_BUILTINS
 #include <hip/hip_runtime.h>
-#include <hip/hip_cooperative_groups.h>
 #include <cmath>
 
-namespace cg = cooperative_groups;
-
-// Complex data structure for inter-thread communication
+// Safe data structure for thread communication
 struct ThreadData {
     float4 position;
     float4 velocity;
@@ -13,21 +10,10 @@ struct ThreadData {
     int state;
 };
 
-// Manual warp reduction function with 64-bit masks
+// Safe warp reduction function
 __device__ float warp_reduce_sum(float val) {
     for (int offset = 16; offset > 0; offset /= 2) {
         val += __shfl_down_sync(0xffffffffffffffffULL, val, offset);
-    }
-    return val;
-}
-
-// Manual warp reduction for active threads
-__device__ float warp_reduce_sum_active(float val, unsigned long long mask) {
-    for (int offset = 16; offset > 0; offset /= 2) {
-        float temp = __shfl_down_sync(mask, val, offset);
-        if ((mask >> (threadIdx.x + offset)) & 1) {
-            val += temp;
-        }
     }
     return val;
 }
@@ -212,9 +198,7 @@ __global__ void safeMemoryPatterns(
     output[idx] = result;
 }
 
-
-
-// Wrapper functions for launching kernels from C++ files
+// Wrapper functions for C++ integration
 extern "C" {
     void launchSafeAdvancedThreading(ThreadData* data, float* results, int* counters, int n, int iterations, int blockSize, int gridSize) {
         safeAdvancedThreading<<<gridSize, blockSize>>>(data, results, counters, n, iterations);
@@ -225,6 +209,8 @@ extern "C" {
     }
     
     void launchSafeMemoryPatterns(float4* input, float4* output, int width, int height, int blockSize, int gridSize) {
-        safeMemoryPatterns<<<gridSize, blockSize>>>(input, output, width, height);
+        dim3 block(16, 16);
+        dim3 grid((width + block.x - 1) / block.x, (height + block.y - 1) / block.y);
+        safeMemoryPatterns<<<grid, block>>>(input, output, width, height);
     }
 }

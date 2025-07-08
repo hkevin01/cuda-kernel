@@ -48,7 +48,7 @@ CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument *parent)
 
     // Keyword format
     QTextCharFormat keywordFormat;
-    keywordFormat.setColor(QColor(86, 156, 214)); // Blue
+    keywordFormat.setForeground(QColor(86, 156, 214)); // Blue
     keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bauto\\b" << "\\bbool\\b" << "\\bbreak\\b" << "\\bcase\\b"
@@ -84,47 +84,47 @@ CppSyntaxHighlighter::CppSyntaxHighlighter(QTextDocument *parent)
     // Class format
     QTextCharFormat classFormat;
     classFormat.setFontWeight(QFont::Bold);
-    classFormat.setColor(QColor(78, 201, 176)); // Teal
+    classFormat.setForeground(QColor(78, 201, 176)); // Teal
     rule.pattern = QRegularExpression(QStringLiteral("\\bQ[A-Za-z]+\\b"));
     rule.format = classFormat;
     highlightingRules.append(rule);
 
     // Function format
     QTextCharFormat functionFormat;
-    functionFormat.setColor(QColor(220, 220, 170)); // Light yellow
+    functionFormat.setForeground(QColor(220, 220, 170)); // Light yellow
     rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
     rule.format = functionFormat;
     highlightingRules.append(rule);
 
     // String format
     QTextCharFormat quotationFormat;
-    quotationFormat.setColor(QColor(206, 145, 120)); // Orange/brown
+    quotationFormat.setForeground(QColor(206, 145, 120)); // Orange/brown
     rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
     // Single line comment format
     QTextCharFormat singleLineCommentFormat;
-    singleLineCommentFormat.setColor(QColor(106, 153, 85)); // Green
+    singleLineCommentFormat.setForeground(QColor(106, 153, 85)); // Green
     rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
     // Multi-line comment format
-    xmlCommentFormat.setColor(QColor(106, 153, 85)); // Green
+    xmlCommentFormat.setForeground(QColor(106, 153, 85)); // Green
     commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
     commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
 
     // Preprocessor format
     QTextCharFormat preprocessorFormat;
-    preprocessorFormat.setColor(QColor(155, 155, 155)); // Gray
+    preprocessorFormat.setForeground(QColor(155, 155, 155)); // Gray
     rule.pattern = QRegularExpression(QStringLiteral("^\\s*#[^\n]*"));
     rule.format = preprocessorFormat;
     highlightingRules.append(rule);
 
     // Number format
     QTextCharFormat numberFormat;
-    numberFormat.setColor(QColor(181, 206, 168)); // Light green
+    numberFormat.setForeground(QColor(181, 206, 168)); // Light green
     rule.pattern = QRegularExpression(QStringLiteral("\\b[0-9]+\\.?[0-9]*[fF]?\\b"));
     rule.format = numberFormat;
     highlightingRules.append(rule);
@@ -328,7 +328,7 @@ void ExampleTab::showSourceCode()
     );
 
     // Apply syntax highlighting
-    CppSyntaxHighlighter *highlighter = new CppSyntaxHighlighter(sourceView->document());
+    new CppSyntaxHighlighter(sourceView->document());
 
     layout->addWidget(sourceView);
 

@@ -53,7 +53,7 @@ A modern Qt-based graphical user interface for the GPU Kernel Examples project, 
 ### Automatic Setup (Linux)
 ```bash
 # Run the setup script
-./scripts/setup_gui.sh
+./scripts/gui/setup_gui.sh
 ```
 
 ### Manual Installation
@@ -174,7 +174,7 @@ git clone <repository-url>
 cd cuda-kernel
 
 # Install dependencies
-./scripts/setup_gui.sh
+./scripts/gui/setup_gui.sh
 
 # Build
 cd build

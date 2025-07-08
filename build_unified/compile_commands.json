@@ -1,0 +1,104 @@
+[
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DUSE_PROF_API=1 -D__HIP_PLATFORM_AMD__=1 -I/home/kevin/Projects/cuda-kernel/src/common -isystem /opt/rocm/include -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/vector_addition.dir/src/01_vector_addition/main_hip.cpp.o -c /home/kevin/Projects/cuda-kernel/src/01_vector_addition/main_hip.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/src/01_vector_addition/main_hip.cpp",
+  "output": "CMakeFiles/vector_addition.dir/src/01_vector_addition/main_hip.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DUSE_PROF_API=1 -D__HIP_PLATFORM_AMD__=1 -I/home/kevin/Projects/cuda-kernel/src/common -isystem /opt/rocm/include -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/vector_addition.dir/src/common/hip_utils.cpp.o -c /home/kevin/Projects/cuda-kernel/src/common/hip_utils.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/src/common/hip_utils.cpp",
+  "output": "CMakeFiles/vector_addition.dir/src/common/hip_utils.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DUSE_PROF_API=1 -D__HIP_PLATFORM_AMD__=1 -I/home/kevin/Projects/cuda-kernel/src/common -isystem /opt/rocm/include -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/vector_addition.dir/src/common/timer.cpp.o -c /home/kevin/Projects/cuda-kernel/src/common/timer.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/src/common/timer.cpp",
+  "output": "CMakeFiles/vector_addition.dir/src/common/timer.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DUSE_PROF_API=1 -D__HIP_PLATFORM_AMD__=1 -I/home/kevin/Projects/cuda-kernel/src/common -isystem /opt/rocm/include -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/vector_addition.dir/src/common/helper_functions.cpp.o -c /home/kevin/Projects/cuda-kernel/src/common/helper_functions.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/src/common/helper_functions.cpp",
+  "output": "CMakeFiles/vector_addition.dir/src/common/helper_functions.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DUSE_PROF_API=1 -D__HIP_PLATFORM_AMD__=1 -I/home/kevin/Projects/cuda-kernel/src/common -isystem /opt/rocm/include -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/advanced_threading.dir/src/07_advanced_threading/main_hip_safe.cpp.o -c /home/kevin/Projects/cuda-kernel/src/07_advanced_threading/main_hip_safe.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/src/07_advanced_threading/main_hip_safe.cpp",
+  "output": "CMakeFiles/advanced_threading.dir/src/07_advanced_threading/main_hip_safe.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DUSE_PROF_API=1 -D__HIP_PLATFORM_AMD__=1 -I/home/kevin/Projects/cuda-kernel/src/common -isystem /opt/rocm/include -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/advanced_threading.dir/src/common/hip_utils.cpp.o -c /home/kevin/Projects/cuda-kernel/src/common/hip_utils.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/src/common/hip_utils.cpp",
+  "output": "CMakeFiles/advanced_threading.dir/src/common/hip_utils.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DUSE_PROF_API=1 -D__HIP_PLATFORM_AMD__=1 -I/home/kevin/Projects/cuda-kernel/src/common -isystem /opt/rocm/include -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/advanced_threading.dir/src/common/timer.cpp.o -c /home/kevin/Projects/cuda-kernel/src/common/timer.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/src/common/timer.cpp",
+  "output": "CMakeFiles/advanced_threading.dir/src/common/timer.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DUSE_PROF_API=1 -D__HIP_PLATFORM_AMD__=1 -I/home/kevin/Projects/cuda-kernel/src/common -isystem /opt/rocm/include -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/advanced_threading.dir/src/common/helper_functions.cpp.o -c /home/kevin/Projects/cuda-kernel/src/common/helper_functions.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/src/common/helper_functions.cpp",
+  "output": "CMakeFiles/advanced_threading.dir/src/common/helper_functions.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/include -I/home/kevin/Projects/cuda-kernel/src/common -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++17 -fPIC -o CMakeFiles/gpu_kernel_gui.dir/gpu_kernel_gui_autogen/mocs_compilation.cpp.o -c /home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/mocs_compilation.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/mocs_compilation.cpp",
+  "output": "CMakeFiles/gpu_kernel_gui.dir/gpu_kernel_gui_autogen/mocs_compilation.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/include -I/home/kevin/Projects/cuda-kernel/src/common -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++17 -fPIC -o CMakeFiles/gpu_kernel_gui.dir/gui/main.cpp.o -c /home/kevin/Projects/cuda-kernel/gui/main.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/gui/main.cpp",
+  "output": "CMakeFiles/gpu_kernel_gui.dir/gui/main.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/include -I/home/kevin/Projects/cuda-kernel/src/common -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++17 -fPIC -o CMakeFiles/gpu_kernel_gui.dir/gui/mainwindow.cpp.o -c /home/kevin/Projects/cuda-kernel/gui/mainwindow.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/gui/mainwindow.cpp",
+  "output": "CMakeFiles/gpu_kernel_gui.dir/gui/mainwindow.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/include -I/home/kevin/Projects/cuda-kernel/src/common -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++17 -fPIC -o CMakeFiles/gpu_kernel_gui.dir/gui/kernel_runner.cpp.o -c /home/kevin/Projects/cuda-kernel/gui/kernel_runner.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/gui/kernel_runner.cpp",
+  "output": "CMakeFiles/gpu_kernel_gui.dir/gui/kernel_runner.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/include -I/home/kevin/Projects/cuda-kernel/src/common -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++17 -fPIC -o CMakeFiles/gpu_kernel_gui.dir/gui/performance_widget.cpp.o -c /home/kevin/Projects/cuda-kernel/gui/performance_widget.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/gui/performance_widget.cpp",
+  "output": "CMakeFiles/gpu_kernel_gui.dir/gui/performance_widget.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/include -I/home/kevin/Projects/cuda-kernel/src/common -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++17 -fPIC -o CMakeFiles/gpu_kernel_gui.dir/gui/result_viewer.cpp.o -c /home/kevin/Projects/cuda-kernel/gui/result_viewer.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/gui/result_viewer.cpp",
+  "output": "CMakeFiles/gpu_kernel_gui.dir/gui/result_viewer.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/include -I/home/kevin/Projects/cuda-kernel/src/common -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++17 -fPIC -o CMakeFiles/gpu_kernel_gui.dir/gui/test_runner.cpp.o -c /home/kevin/Projects/cuda-kernel/gui/test_runner.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/gui/test_runner.cpp",
+  "output": "CMakeFiles/gpu_kernel_gui.dir/gui/test_runner.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/include -I/home/kevin/Projects/cuda-kernel/src/common -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++17 -fPIC -o CMakeFiles/gpu_kernel_gui.dir/gui/example_tabs.cpp.o -c /home/kevin/Projects/cuda-kernel/gui/example_tabs.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/gui/example_tabs.cpp",
+  "output": "CMakeFiles/gpu_kernel_gui.dir/gui/example_tabs.cpp.o"
+},
+{
+  "directory": "/home/kevin/Projects/cuda-kernel/build_unified",
+  "command": "/usr/bin/c++ -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_WIDGETS_LIB -I/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/include -I/home/kevin/Projects/cuda-kernel/src/common -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -O3 -std=c++14 -O3 -DNDEBUG -std=gnu++17 -fPIC -o CMakeFiles/gpu_kernel_gui.dir/gpu_kernel_gui_autogen/DMHXEJ42XS/qrc_resources.cpp.o -c /home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/DMHXEJ42XS/qrc_resources.cpp",
+  "file": "/home/kevin/Projects/cuda-kernel/build_unified/gpu_kernel_gui_autogen/DMHXEJ42XS/qrc_resources.cpp",
+  "output": "CMakeFiles/gpu_kernel_gui.dir/gpu_kernel_gui_autogen/DMHXEJ42XS/qrc_resources.cpp.o"
+}
+]

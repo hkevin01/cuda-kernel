@@ -168,7 +168,7 @@ void KernelRunner::loadKernelList()
     m_kernelList->clear();
     m_kernels.clear();
 
-    // Define available kernels
+    // Define available kernels (only include working ones)
     QStringList kernelNames = {
         "Vector Addition",
         "Matrix Multiplication",
@@ -178,9 +178,7 @@ void KernelRunner::loadKernelList()
         "Advanced FFT",
         "Advanced Threading",
         "Dynamic Memory",
-        "Warp Primitives",
-        "3D FFT",
-        "N-Body Simulation"};
+        "3D FFT"};
 
     QStringList descriptions = {
         "Simple vector addition kernel demonstrating basic GPU operations",
@@ -191,13 +189,11 @@ void KernelRunner::loadKernelList()
         "Advanced FFT implementation with multiple optimizations",
         "Demonstrates advanced thread cooperation patterns",
         "Dynamic memory allocation and management on GPU",
-        "Warp-level primitives and synchronization",
-        "3D FFT implementation for volumetric data",
-        "N-body gravitational simulation with optimizations"};
+        "3D FFT implementation for volumetric data"};
 
     QStringList categories = {
         "Basic", "Basic", "Basic", "Basic", "Basic",
-        "Advanced", "Advanced", "Advanced", "Advanced", "Advanced", "Advanced"}; // Map display names to actual executable names
+        "Advanced", "Advanced", "Advanced", "Advanced"}; // Map display names to actual executable names
     // These correspond to executables in build/bin/
     QMap<QString, QString> executableMap;
     executableMap["Vector Addition"] = "vector_addition";
@@ -206,7 +202,7 @@ void KernelRunner::loadKernelList()
     executableMap["2D Convolution"] = "convolution_2d";
     executableMap["Monte Carlo"] = "monte_carlo";
     executableMap["Advanced FFT"] = "advanced_fft";
-    // executableMap["Advanced Threading"] = "advanced_threading";  // DISABLED: System crash
+    executableMap["Advanced Threading"] = "advanced_threading";  // ENABLED: Safe version now available
     executableMap["Dynamic Memory"] = "dynamic_memory";
     // executableMap["Warp Primitives"] = "warp_primitives";  // NOT BUILT: No executable
     executableMap["3D FFT"] = "advanced_fft";  // FIXED: Maps to existing advanced_fft executable
@@ -327,7 +323,7 @@ void KernelRunner::runKernel(const QString &kernelName)
         kernelName == "Parallel Reduction" ||
         kernelName == "2D Convolution" ||
         kernelName == "Monte Carlo" ||
-        // kernelName == "Advanced Threading" ||  // DISABLED: Causes system crash
+        kernelName == "Advanced Threading" ||  // ENABLED: Safe version now available
         // kernelName == "Warp Primitives" ||  // DISABLED: Not built
         kernelName == "Advanced FFT" ||
         kernelName == "3D FFT" ||  // ADDED: Maps to advanced_fft executable
@@ -366,7 +362,7 @@ QString KernelRunner::getKernelExecutable(const QString &kernelName)
     executableMap["2D Convolution"] = "convolution_2d";
     executableMap["Monte Carlo"] = "monte_carlo";
     executableMap["Advanced FFT"] = "advanced_fft";
-    // executableMap["Advanced Threading"] = "advanced_threading";  // DISABLED: System crash
+    executableMap["Advanced Threading"] = "advanced_threading";  // ENABLED: Safe version now available
     executableMap["Dynamic Memory"] = "dynamic_memory";
     // executableMap["Warp Primitives"] = "warp_primitives";  // NOT BUILT: No executable
     executableMap["3D FFT"] = "advanced_fft";  // FIXED: Maps to existing advanced_fft executable
@@ -378,15 +374,56 @@ QString KernelRunner::getKernelExecutable(const QString &kernelName)
         return QString();
     }
 
+    // --- DYNAMIC PROJECT ROOT SEARCH ---
+    QDir currentDir(QApplication::applicationDirPath());
+    QString projectRootPath;
+
+    // Search upwards for a project marker (e.g., CMakeLists.txt or .git folder)
+    while (currentDir.cdUp()) {
+        if (QFileInfo(currentDir.filePath("CMakeLists.txt")).exists() || QFileInfo(currentDir.filePath(".git")).isDir()) {
+            projectRootPath = currentDir.absolutePath();
+            break;
+        }
+        // Break if we've reached the filesystem root
+        if (currentDir.isRoot()) {
+            break;
+        }
+    }
+
+    if (!projectRootPath.isEmpty()) {
+        // Try HIP version first (for AMD GPUs), then CUDA version
+        QStringList potentialPaths = {
+            projectRootPath + "/build_simple/bin/" + executableName,  // Primary location for HIP kernels
+            projectRootPath + "/build_hip/" + executableName + "_hip",
+            projectRootPath + "/build/bin/" + executableName,
+            projectRootPath + "/build_hip/bin/" + executableName
+        };
+        
+        for (const QString &potentialPath : potentialPaths) {
+            QFileInfo fileInfo(potentialPath);
+            if (fileInfo.exists() && fileInfo.isExecutable()) {
+                return potentialPath;
+            }
+        }
+    }
+    // --- END DYNAMIC SEARCH ---
+
+
+    // --- FALLBACK: ORIGINAL RELATIVE PATHS ---
     // Look in the same directory as the GUI executable (build/bin)
-    // and also check relative paths from there
+    // and also check relative paths from there, prioritizing HIP executables
     QStringList searchPaths = {
+        QApplication::applicationDirPath() + "/" + executableName + "_hip", // HIP version in same directory
         QApplication::applicationDirPath() + "/" + executableName, // Same directory as GUI
+        QApplication::applicationDirPath() + "/../" + executableName + "_hip", // HIP version up one level
         QApplication::applicationDirPath() + "/../bin/" + executableName,
         QApplication::applicationDirPath() + "/../build/bin/" + executableName,
         QApplication::applicationDirPath() + "/../../build/bin/" + executableName,
         QApplication::applicationDirPath() + "/../../../build/bin/" + executableName, // For build_gui/bin -> build/bin
-        "./build/bin/" + executableName}; // Absolute fallback path
+        QApplication::applicationDirPath() + "/../../../build_simple/bin/" + executableName, // Primary HIP location
+        QApplication::applicationDirPath() + "/../../../build_hip/" + executableName + "_hip", // HIP fallback
+        "./build/bin/" + executableName, // Absolute fallback path
+        "./build_simple/bin/" + executableName}; // Primary HIP fallback path
 
     for (const QString &executable : searchPaths)
     {
@@ -635,7 +672,8 @@ void KernelRunner::onProcessOutput()
 
     if (!error.isEmpty())
     {
-        m_outputText->append(tr("<span style='color: red;'>%1</span>").arg(error));
+        // Use a more descriptive label for errors
+        m_outputText->append(tr("<span style='color: red; font-weight: bold;'>[STDERR] %1</span>").arg(error.trimmed()));
     }
 }
 
