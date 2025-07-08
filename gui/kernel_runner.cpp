@@ -219,6 +219,18 @@ void KernelRunner::loadKernelList()
         "Basic", "Basic", "Basic", "Basic", "Basic",
         "Advanced", "Advanced", "Advanced", "Advanced", "Advanced"};
 
+    QStringList parameterInfo = {
+        "Data Size: Number of elements to add (default: 1M elements)\nIterations: How many times to repeat the operation",
+        "Matrix Size: Width/height of square matrices (default: 512x512)\nIterations: Number of multiplication rounds to perform",
+        "Array Size: Number of elements to reduce (default: 1M elements)\nOperation: Sum, Max, or Min reduction",
+        "Image Size: Width/height of image to process (default: 512x512)\nKernel Size: Size of convolution filter (3x3, 5x5, etc.)",
+        "Sample Count: Number of random samples (default: 1M samples)\nIterations: Monte Carlo rounds for better accuracy",
+        "Signal Size: Length of signal for FFT (default: 1024 points)\nDimensions: 1D, 2D, or 3D FFT processing",
+        "Thread Count: Number of GPU threads (default: auto-detect)\nSync Pattern: Different synchronization strategies",
+        "Memory Size: Amount of GPU memory to allocate (default: 100MB)\nAccess Pattern: Sequential, random, or coalesced access",
+        "Volume Size: 3D data dimensions (default: 64x64x64)\nBatch Size: Number of 3D volumes to process",
+        "Particle Count: Number of bodies in simulation (default: 1024)\nTime Steps: Number of simulation iterations"};
+
     // Map display names to actual executable names
     QMap<QString, QString> executableMap;
     executableMap["Vector Addition"] = "vector_addition";
@@ -239,6 +251,11 @@ void KernelRunner::loadKernelList()
         info.description = descriptions[i];
         info.category = categories[i];
         info.executableName = executableMap.value(kernelNames[i], "");
+        
+        // Add parameter information
+        if (i < parameterInfo.size()) {
+            info.parameters = parameterInfo[i].split('\n');
+        }
 
         // IMPROVED: Check for executable existence *before* adding to the list
         info.executablePath = findKernelExecutable(info.executableName);
@@ -436,6 +453,17 @@ void KernelRunner::updateKernelInfo(const QString &kernelName)
     const KernelInfo &info = m_kernels[kernelName];
     m_kernelNameLabel->setText(info.name);
     m_kernelDescriptionLabel->setText(info.description);
+    
+    // Display parameter information
+    if (!info.parameters.isEmpty()) {
+        QString paramText = "<b>Parameters:</b><br/>";
+        for (const QString &param : info.parameters) {
+            paramText += "• " + param + "<br/>";
+        }
+        m_kernelParametersLabel->setText(paramText);
+    } else {
+        m_kernelParametersLabel->setText("<i>No configurable parameters</i>");
+    }
 
     // Update run button based on whether executable was found
     m_runButton->setEnabled(!info.executablePath.isEmpty() && !m_isRunning);
