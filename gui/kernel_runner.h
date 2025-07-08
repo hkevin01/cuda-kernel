@@ -17,6 +17,7 @@
 #include <QMap>
 #include <QString>
 #include <QStringList>
+#include <QPointer>
 
 class KernelRunner : public QWidget
 {
@@ -41,13 +42,14 @@ private slots:
     void onProcessError(QProcess::ProcessError error);
     void onProcessOutput();
     void updateProgress();
+    void cleanupProcess(); // New cleanup slot
 
 private:
     void setupUI();
     void loadKernelList();
     void runKernel(const QString &kernelName);
     void updateKernelInfo(const QString &kernelName);
-    QString getKernelExecutable(const QString &kernelName);
+    QString findKernelExecutable(const QString &executableName);
     void parseKernelOutput(const QString &output);
 
     // UI Components
@@ -69,7 +71,7 @@ private:
     QLabel *m_kernelParametersLabel;
 
     // Process management
-    QProcess *m_currentProcess;
+    QPointer<QProcess> m_currentProcess;
     QTimer *m_progressTimer;
     QString m_currentKernel;
     bool m_isRunning;
@@ -79,7 +81,8 @@ private:
     {
         QString name;
         QString description;
-        QString executable;
+        QString executableName; // The base name of the executable
+        QString executablePath; // The full path to the found executable
         QStringList parameters;
         QString category;
     };

@@ -4,6 +4,9 @@
 build/
 build_hip/
 build_cuda/
+build_gui/
+build_gui_hip/
+build_simple/
 bin/
 obj/
 output/
@@ -11,6 +14,7 @@ dist/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
+compile_commands.json
 
 # CUDA object files
 *.o
@@ -35,6 +39,7 @@ a.out
 *_hip
 *_cuda
 test_*
+gpu_kernel_gui
 
 # Library files
 *.lib
@@ -86,6 +91,15 @@ gmon.out
 *~
 .#*
 #*#
+/tmp/
+*.log
+gui_output.log
+kernel_test_output.log
+
+# Test and log files
+HIP_BUILD_SUCCESS_SUMMARY.md
+*_temp.log
+*_test.log
 
 # IDE files
 .vscode/
@@ -146,10 +160,32 @@ test_output/
 rocprof_*
 roctx_*
 
+# Qt specific files
+*.qmake.stash
+.qmake.super
+.qmake.cache
+*.pro.user
+*.pri.user
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.moc
+.rcc/
+*.qm
+*.ts~
+
 # Build artifacts
 test_hip/
 test_cuda/
 benchmarks/
+.qt/
+lib/
+*_organization_summary.sh
+
+# Script organization temporary files
+scripts_moved_*
+organization_*.log
 
 # Advanced GPU examples
 *_simplified.cpp

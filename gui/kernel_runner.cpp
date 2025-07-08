@@ -9,6 +9,7 @@
 #include <QJsonArray>
 #include <QTextStream>
 #include <QScrollBar>
+#include <QRegularExpression>
 
 KernelRunner::KernelRunner(QWidget *parent)
     : QWidget(parent), m_currentProcess(nullptr), m_progressTimer(new QTimer(this)), m_isRunning(false)
@@ -23,10 +24,23 @@ KernelRunner::KernelRunner(QWidget *parent)
 
 KernelRunner::~KernelRunner()
 {
-    if (m_currentProcess && m_currentProcess->state() == QProcess::Running)
+    // Stop progress timer
+    if (m_progressTimer && m_progressTimer->isActive())
     {
-        m_currentProcess->terminate();
-        m_currentProcess->waitForFinished(5000);
+        m_progressTimer->stop();
+    }
+    
+    // Clean up process using QPointer
+    if (m_currentProcess)
+    {
+        if (m_currentProcess->state() == QProcess::Running)
+        {
+            m_currentProcess->terminate();
+            m_currentProcess->waitForFinished(3000);
+        }
+        
+        // Let Qt handle the cleanup naturally
+        m_currentProcess->deleteLater();
     }
 }
 
@@ -138,10 +152,11 @@ void KernelRunner::setupUI()
     // Set background color and improve readability
     m_outputText->setStyleSheet(
         "QTextEdit {"
-        "    background-color: #f8f8f8;"
-        "    border: 1px solid #cccccc;"
+        "    background-color: #d0d0d0;"
+        "    border: 1px solid #999999;"
         "    padding: 5px;"
         "    line-height: 1.2;"
+        "    color: #000000;"
         "}"
     );
     
@@ -178,7 +193,8 @@ void KernelRunner::loadKernelList()
         "Advanced FFT",
         "Advanced Threading",
         "Dynamic Memory",
-        "3D FFT"};
+        "3D FFT",
+        "N-Body Simulation"};
 
     QStringList descriptions = {
         "Simple vector addition kernel demonstrating basic GPU operations",
@@ -189,12 +205,14 @@ void KernelRunner::loadKernelList()
         "Advanced FFT implementation with multiple optimizations",
         "Demonstrates advanced thread cooperation patterns",
         "Dynamic memory allocation and management on GPU",
-        "3D FFT implementation for volumetric data"};
+        "3D FFT implementation for volumetric data",
+        "N-body gravitational simulation with optimizations"};
 
     QStringList categories = {
         "Basic", "Basic", "Basic", "Basic", "Basic",
-        "Advanced", "Advanced", "Advanced", "Advanced"}; // Map display names to actual executable names
-    // These correspond to executables in build/bin/
+        "Advanced", "Advanced", "Advanced", "Advanced", "Advanced"};
+
+    // Map display names to actual executable names
     QMap<QString, QString> executableMap;
     executableMap["Vector Addition"] = "vector_addition";
     executableMap["Matrix Multiplication"] = "matrix_multiplication";
@@ -202,13 +220,10 @@ void KernelRunner::loadKernelList()
     executableMap["2D Convolution"] = "convolution_2d";
     executableMap["Monte Carlo"] = "monte_carlo";
     executableMap["Advanced FFT"] = "advanced_fft";
-    executableMap["Advanced Threading"] = "advanced_threading";  // ENABLED: Safe version now available
+    executableMap["Advanced Threading"] = "advanced_threading";
     executableMap["Dynamic Memory"] = "dynamic_memory";
-    // executableMap["Warp Primitives"] = "warp_primitives";  // NOT BUILT: No executable
-    executableMap["3D FFT"] = "advanced_fft";  // FIXED: Maps to existing advanced_fft executable
+    executableMap["3D FFT"] = "advanced_fft";
     executableMap["N-Body Simulation"] = "nbody_simulation";
-
-    // Update: Most kernels are now built and available
 
     for (int i = 0; i < kernelNames.size(); ++i)
     {
@@ -216,18 +231,15 @@ void KernelRunner::loadKernelList()
         info.name = kernelNames[i];
         info.description = descriptions[i];
         info.category = categories[i];
+        info.executableName = executableMap.value(kernelNames[i], "");
 
-        // Set executable name from mapping (empty if not available)
-        info.executable = executableMap.value(kernelNames[i], "");
-
-        // No hard-coded parameters - they're handled dynamically in runKernel()
-        // info.parameters is now empty and will be set at runtime based on UI values
+        // IMPROVED: Check for executable existence *before* adding to the list
+        info.executablePath = findKernelExecutable(info.executableName);
 
         m_kernels[info.name] = info;
 
-        // Add to list with category prefix, and note if not available
         QString displayName = QString("[%1] %2").arg(info.category, info.name);
-        if (info.executable.isEmpty())
+        if (info.executablePath.isEmpty())
         {
             displayName += " (Not Built)";
         }
@@ -236,7 +248,6 @@ void KernelRunner::loadKernelList()
         m_kernelList->addItem(item);
     }
 
-    // Select first kernel
     if (m_kernelList->count() > 0)
     {
         m_kernelList->setCurrentRow(0);
@@ -287,8 +298,8 @@ void KernelRunner::runKernel(const QString &kernelName)
     m_progressTimer->start();
     emit progressUpdated(0);
 
-    // Get executable path
-    QString executable = getKernelExecutable(kernelName);
+    // Get executable path from our stored info
+    QString executable = m_kernels[kernelName].executablePath;
     if (executable.isEmpty())
     {
         QMessageBox::critical(this, tr("Executable Not Found"),
@@ -300,18 +311,19 @@ void KernelRunner::runKernel(const QString &kernelName)
         return;
     }
 
-    // Create process
-    m_currentProcess = new QProcess(this);
+    // Create process with minimal signal connections
+    if (m_currentProcess) {
+        // Schedule cleanup of existing process
+        QTimer::singleShot(0, this, &KernelRunner::cleanupProcess);
+    }
+    
+    m_currentProcess = new QProcess();  // Don't set parent to avoid automatic cleanup
 
-    // Set up process connections
+    // Use only essential signal connections
     connect(m_currentProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-            this, &KernelRunner::onProcessFinished);
-    connect(m_currentProcess, &QProcess::errorOccurred,
-            this, &KernelRunner::onProcessError);
+            this, &KernelRunner::onProcessFinished, Qt::QueuedConnection);
     connect(m_currentProcess, &QProcess::readyReadStandardOutput,
-            this, &KernelRunner::onProcessOutput);
-    connect(m_currentProcess, &QProcess::readyReadStandardError,
-            this, &KernelRunner::onProcessOutput);
+            this, &KernelRunner::onProcessOutput, Qt::QueuedConnection);
 
     // Prepare arguments based on kernel type
     QStringList arguments;
@@ -323,10 +335,9 @@ void KernelRunner::runKernel(const QString &kernelName)
         kernelName == "Parallel Reduction" ||
         kernelName == "2D Convolution" ||
         kernelName == "Monte Carlo" ||
-        kernelName == "Advanced Threading" ||  // ENABLED: Safe version now available
-        // kernelName == "Warp Primitives" ||  // DISABLED: Not built
+        kernelName == "Advanced Threading" ||
         kernelName == "Advanced FFT" ||
-        kernelName == "3D FFT" ||  // ADDED: Maps to advanced_fft executable
+        kernelName == "3D FFT" ||
         kernelName == "Dynamic Memory" ||
         kernelName == "N-Body Simulation")
     {
@@ -351,24 +362,8 @@ void KernelRunner::runKernel(const QString &kernelName)
     m_currentProcess->start(executable, arguments);
 }
 
-QString KernelRunner::getKernelExecutable(const QString &kernelName)
+QString KernelRunner::findKernelExecutable(const QString &executableName)
 {
-    // Map kernel names to actual executable names
-    // These correspond to executables in build/bin/
-    QMap<QString, QString> executableMap;
-    executableMap["Vector Addition"] = "vector_addition";
-    executableMap["Matrix Multiplication"] = "matrix_multiplication";
-    executableMap["Parallel Reduction"] = "parallel_reduction";
-    executableMap["2D Convolution"] = "convolution_2d";
-    executableMap["Monte Carlo"] = "monte_carlo";
-    executableMap["Advanced FFT"] = "advanced_fft";
-    executableMap["Advanced Threading"] = "advanced_threading";  // ENABLED: Safe version now available
-    executableMap["Dynamic Memory"] = "dynamic_memory";
-    // executableMap["Warp Primitives"] = "warp_primitives";  // NOT BUILT: No executable
-    executableMap["3D FFT"] = "advanced_fft";  // FIXED: Maps to existing advanced_fft executable
-    executableMap["N-Body Simulation"] = "nbody_simulation";
-
-    QString executableName = executableMap.value(kernelName);
     if (executableName.isEmpty())
     {
         return QString();
@@ -384,53 +379,37 @@ QString KernelRunner::getKernelExecutable(const QString &kernelName)
             projectRootPath = currentDir.absolutePath();
             break;
         }
-        // Break if we've reached the filesystem root
         if (currentDir.isRoot()) {
             break;
         }
     }
 
-    if (!projectRootPath.isEmpty()) {
-        // Try HIP version first (for AMD GPUs), then CUDA version
-        QStringList potentialPaths = {
-            projectRootPath + "/build_simple/bin/" + executableName,  // Primary location for HIP kernels
-            projectRootPath + "/build_hip/" + executableName + "_hip",
-            projectRootPath + "/build/bin/" + executableName,
-            projectRootPath + "/build_hip/bin/" + executableName
-        };
-        
-        for (const QString &potentialPath : potentialPaths) {
-            QFileInfo fileInfo(potentialPath);
-            if (fileInfo.exists() && fileInfo.isExecutable()) {
-                return potentialPath;
-            }
-        }
-    }
-    // --- END DYNAMIC SEARCH ---
+    QStringList searchPaths;
 
+    if (!projectRootPath.isEmpty()) {
+        // Prioritize HIP build directories, then standard build directories
+        searchPaths << projectRootPath + "/build_gui_hip/bin/" + executableName;
+        searchPaths << projectRootPath + "/build_simple/bin/" + executableName;
+        searchPaths << projectRootPath + "/build/bin/" + executableName;
+        searchPaths << projectRootPath + "/build_hip/bin/" + executableName;
+        searchPaths << projectRootPath + "/build_hip/" + executableName + "_hip";
+    }
 
     // --- FALLBACK: ORIGINAL RELATIVE PATHS ---
-    // Look in the same directory as the GUI executable (build/bin)
-    // and also check relative paths from there, prioritizing HIP executables
-    QStringList searchPaths = {
-        QApplication::applicationDirPath() + "/" + executableName + "_hip", // HIP version in same directory
-        QApplication::applicationDirPath() + "/" + executableName, // Same directory as GUI
-        QApplication::applicationDirPath() + "/../" + executableName + "_hip", // HIP version up one level
-        QApplication::applicationDirPath() + "/../bin/" + executableName,
-        QApplication::applicationDirPath() + "/../build/bin/" + executableName,
-        QApplication::applicationDirPath() + "/../../build/bin/" + executableName,
-        QApplication::applicationDirPath() + "/../../../build/bin/" + executableName, // For build_gui/bin -> build/bin
-        QApplication::applicationDirPath() + "/../../../build_simple/bin/" + executableName, // Primary HIP location
-        QApplication::applicationDirPath() + "/../../../build_hip/" + executableName + "_hip", // HIP fallback
-        "./build/bin/" + executableName, // Absolute fallback path
-        "./build_simple/bin/" + executableName}; // Primary HIP fallback path
+    searchPaths << QApplication::applicationDirPath() + "/" + executableName;
+    searchPaths << QApplication::applicationDirPath() + "/" + executableName + "_hip";
+    searchPaths << QApplication::applicationDirPath() + "/../bin/" + executableName;
+    searchPaths << QApplication::applicationDirPath() + "/../../build/bin/" + executableName;
+    searchPaths << QApplication::applicationDirPath() + "/../../build_simple/bin/" + executableName;
+    searchPaths << "./build/bin/" + executableName;
+    searchPaths << "./build_simple/bin/" + executableName;
 
-    for (const QString &executable : searchPaths)
+    for (const QString &path : searchPaths)
     {
-        QFileInfo fileInfo(executable);
+        QFileInfo fileInfo(path);
         if (fileInfo.exists() && fileInfo.isExecutable())
         {
-            return executable;
+            return fileInfo.absoluteFilePath(); // Return the full, canonical path
         }
     }
 
@@ -451,12 +430,17 @@ void KernelRunner::updateKernelInfo(const QString &kernelName)
     m_kernelNameLabel->setText(info.name);
     m_kernelDescriptionLabel->setText(info.description);
 
-    QString params = tr("Parameters: --iterations <count> --size <elements> --platform <cuda|hip>");
-    if (!info.parameters.isEmpty())
+    // Update run button based on whether executable was found
+    m_runButton->setEnabled(!info.executablePath.isEmpty() && !m_isRunning);
+
+    if (info.executablePath.isEmpty())
     {
-        params += "\n" + tr("Additional: %1").arg(info.parameters.join(" "));
+        m_statusLabel->setText(tr("Kernel not built - executable not available"));
     }
-    m_kernelParametersLabel->setText(params);
+    else
+    {
+        m_statusLabel->setText(tr("Ready"));
+    }
 }
 
 void KernelRunner::parseKernelOutput(const QString &output)
@@ -563,19 +547,6 @@ void KernelRunner::onKernelSelectionChanged()
     {
         QString kernelName = currentItem->data(Qt::UserRole).toString();
         updateKernelInfo(kernelName);
-
-        // Enable/disable run button based on whether executable exists
-        bool hasExecutable = !m_kernels[kernelName].executable.isEmpty();
-        m_runButton->setEnabled(hasExecutable && !m_isRunning);
-
-        if (!hasExecutable)
-        {
-            m_statusLabel->setText(tr("Kernel not built - executable not available"));
-        }
-        else
-        {
-            m_statusLabel->setText(tr("Ready"));
-        }
     }
 }
 
@@ -589,8 +560,30 @@ void KernelRunner::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
     m_progressBar->setVisible(false);
 
     bool success = (exitCode == 0 && exitStatus == QProcess::NormalExit);
-    QString result = m_currentProcess->readAllStandardOutput() +
-                     m_currentProcess->readAllStandardError();
+    QString result;
+    
+    if (m_currentProcess && !m_currentProcess.isNull()) {
+        // Read any remaining output and process it
+        QString remainingOutput = m_currentProcess->readAllStandardOutput();
+        QString remainingError = m_currentProcess->readAllStandardError();
+        
+        // Process any remaining output through the normal output parser
+        if (!remainingOutput.isEmpty()) {
+            parseKernelOutput(remainingOutput);
+        }
+        
+        // Handle any remaining stderr (with filtering)
+        if (!remainingError.isEmpty()) {
+            QString filteredError = remainingError;
+            filteredError.remove(QRegularExpression(".*Warning: Resource leak detected by SharedSignalPool.*\\n?"));
+            
+            if (!filteredError.trimmed().isEmpty()) {
+                m_outputText->append(tr("<span style='color: red; font-weight: bold;'>[STDERR] %1</span>").arg(filteredError.trimmed()));
+            }
+        }
+        
+        result = remainingOutput + remainingError;
+    }
 
     if (success)
     {
@@ -603,9 +596,8 @@ void KernelRunner::onProcessFinished(int exitCode, QProcess::ExitStatus exitStat
         m_outputText->append(tr("\n<b>Kernel failed with exit code %1</b>").arg(exitCode));
     }
 
-    // Clean up process
-    m_currentProcess->deleteLater();
-    m_currentProcess = nullptr;
+    // Schedule deferred cleanup of process
+    QTimer::singleShot(100, this, &KernelRunner::cleanupProcess);
 
     // Emit signal
     emit kernelFinished(m_currentKernel, success, result);
@@ -647,11 +639,8 @@ void KernelRunner::onProcessError(QProcess::ProcessError error)
     m_statusLabel->setText(tr("Error: %1").arg(errorMsg));
     m_outputText->append(tr("\n<b>Error: %1</b>").arg(errorMsg));
 
-    if (m_currentProcess)
-    {
-        m_currentProcess->deleteLater();
-        m_currentProcess = nullptr;
-    }
+    // Schedule deferred cleanup of process
+    QTimer::singleShot(100, this, &KernelRunner::cleanupProcess);
 
     emit kernelFinished(m_currentKernel, false, errorMsg);
     emit progressUpdated(-1);
@@ -672,8 +661,15 @@ void KernelRunner::onProcessOutput()
 
     if (!error.isEmpty())
     {
-        // Use a more descriptive label for errors
-        m_outputText->append(tr("<span style='color: red; font-weight: bold;'>[STDERR] %1</span>").arg(error.trimmed()));
+        // Filter out Qt SharedSignalPool warnings
+        QString filteredError = error;
+        filteredError.remove(QRegularExpression(".*Warning: Resource leak detected by SharedSignalPool.*\\n?"));
+        
+        if (!filteredError.trimmed().isEmpty())
+        {
+            // Use a more descriptive label for errors
+            m_outputText->append(tr("<span style='color: red; font-weight: bold;'>[STDERR] %1</span>").arg(filteredError.trimmed()));
+        }
     }
 }
 
@@ -691,4 +687,30 @@ void KernelRunner::updateProgress()
 void KernelRunner::refreshKernelList()
 {
     loadKernelList();
+}
+
+void KernelRunner::cleanupProcess()
+{
+    // This slot is called via QTimer::singleShot to ensure proper event loop processing
+    if (m_currentProcess && !m_currentProcess.isNull())
+    {
+        // Disconnect all signals first
+        m_currentProcess->disconnect();
+        
+        // Terminate the process if it's still running
+        if (m_currentProcess->state() != QProcess::NotRunning)
+        {
+            m_currentProcess->terminate();
+            m_currentProcess->waitForFinished(1000);
+            if (m_currentProcess->state() != QProcess::NotRunning)
+            {
+                m_currentProcess->kill();
+                m_currentProcess->waitForFinished(500);
+            }
+        }
+        
+        // Direct deletion to avoid Qt's event system
+        delete m_currentProcess.data();
+        m_currentProcess.clear(); // Clear the QPointer
+    }
 }

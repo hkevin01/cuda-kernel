@@ -98,12 +98,24 @@ build_project() {
 # Function to run the GUI
 run_gui() {
     local platform=$1
-    local gui_path="build/bin/gpu_kernel_gui"
+    local gui_path
+    
+    # Use the appropriate GUI build based on platform
+    if [ "$platform" = "hip" ]; then
+        gui_path="build_gui_hip/bin/gpu_kernel_gui"
+    else
+        gui_path="build/bin/gpu_kernel_gui"
+    fi
     
     if [ ! -f "$gui_path" ]; then
         print_error "GUI executable not found at $gui_path"
         print_status "Building project first..."
-        build_project $platform
+        if [ "$platform" = "hip" ]; then
+            print_status "Building HIP GUI..."
+            bash scripts/build/build_gui_hip.sh
+        else
+            build_project $platform
+        fi
     fi
     
     # Create logs directory
