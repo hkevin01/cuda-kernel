@@ -129,9 +129,9 @@ __global__ void warpPrimitivesShowcase(
     
     // 2. Warp vote operations
     bool predicate = (value % 2 == 0);
-    bool all_even = __all_sync(__activemask(), predicate);
-    bool any_even = __any_sync(__activemask(), predicate);
-    unsigned ballot_result = __ballot_sync(__activemask(), predicate);
+    bool all_even = __all(predicate);
+    bool any_even = __any(predicate);
+    unsigned ballot_result = __ballot(predicate);
     
     // 3. Warp reduction operations using manual implementation
     int sum = value;
@@ -173,7 +173,7 @@ __global__ void warpPrimitivesShowcase(
     }
     
     // Conditional warp operations
-    auto active_mask = __ballot_sync(__activemask(), value > 50);
+    auto active_mask = __ballot(value > 50);
     if (value > 50) {
         // Manual reduction for active threads
         int temp_result = complex_result;
@@ -251,7 +251,11 @@ __global__ void multiLevelReduction(
             break;
         case 4: // Complex reduction (RMS)
             value = value * value; // Square first
-            value = cg::reduce(warp, value, cg::plus<float>());
+            value = warp.shfl_down(value, 16); // Reduce across warp
+            value = warp.shfl_down(value, 8);
+            value = warp.shfl_down(value, 4);
+            value = warp.shfl_down(value, 2);
+            value = warp.shfl_down(value, 1);
             if (warp.thread_rank() == 0) {
                 value = sqrtf(value / 32.0f);
             }
@@ -297,7 +301,11 @@ __global__ void multiLevelReduction(
                 }
                 break;
             case 4:
-                warp_val = cg::reduce(warp, warp_val, cg::plus<float>());
+                warp_val = warp.shfl_down(warp_val, 16); // Reduce across warp
+                warp_val = warp.shfl_down(warp_val, 8);
+                warp_val = warp.shfl_down(warp_val, 4);
+                warp_val = warp.shfl_down(warp_val, 2);
+                warp_val = warp.shfl_down(warp_val, 1);
                 if (warp.thread_rank() == 0) {
                     warp_val = sqrtf(warp_val / (blockDim.x / 32.0f));
                 }
@@ -490,7 +498,7 @@ __global__ void warpOptimizedConvolution(
         }
     }
     
-    __syncwarp();
+    __syncthreads();
     
     // Process convolution using warp cooperation
     for (int local_y = 0; local_y < 32; local_y++) {
@@ -654,7 +662,7 @@ __global__ void warpStringProcessing(
     }
     
     // Warp-level match aggregation
-    unsigned match_mask = __ballot_sync(__activemask(), match);
+    unsigned match_mask = __ballot(match);
     int match_count = __popc(match_mask);
     
     // Store results

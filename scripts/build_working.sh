@@ -166,6 +166,12 @@ cd src/08_dynamic_memory
 hipcc -O3 -std=c++14 -I../common -o ../../build_simple/bin/dynamic_memory main_hip.cpp dynamic_memory_hip.hip ../common/hip_utils.cpp ../common/timer.cpp ../common/helper_functions.cpp
 cd ../..
 
+# Build warp primitives
+print_status "Building warp_primitives..."
+cd src/09_warp_primitives
+hipcc -O3 -std=c++14 -I../common -o ../../build_simple/bin/warp_primitives main_hip.cpp warp_primitives_hip.hip ../common/hip_utils.cpp ../common/timer.cpp ../common/helper_functions.cpp
+cd ../..
+
 print_success "All working kernels built successfully"
 
 # Step 3: Verify build results
@@ -175,7 +181,18 @@ print_status "Step 3: Verifying build results..."
 KERNEL_COUNT=0
 EXPECTED_KERNELS=7
 
-for kernel in vector_addition matrix_multiplication parallel_reduction convolution_2d monte_carlo advanced_threading dynamic_memory; do
+KERNELS=(
+    "vector_addition"
+    "matrix_multiplication"
+    "parallel_reduction"
+    "convolution_2d"
+    "monte_carlo"
+    "advanced_threading"
+    "dynamic_memory"
+    "warp_primitives"
+)
+
+for kernel in "${KERNELS[@]}"; do
     if [ -x "build_simple/bin/$kernel" ]; then
         print_success "✓ $kernel"
         KERNEL_COUNT=$((KERNEL_COUNT + 1))
