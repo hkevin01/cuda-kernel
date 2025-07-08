@@ -10,6 +10,7 @@
 #include <QTextStream>
 #include <QScrollBar>
 #include <QRegularExpression>
+#include <QPalette>
 
 KernelRunner::KernelRunner(QWidget *parent)
     : QWidget(parent), m_currentProcess(nullptr), m_progressTimer(new QTimer(this)), m_isRunning(false)
@@ -149,16 +150,22 @@ void KernelRunner::setupUI()
     monospaceFont.setStyleHint(QFont::Monospace);
     m_outputText->setFont(monospaceFont);
     
-    // Set background color and improve readability
+    // Set background color and improve readability - force override
     m_outputText->setStyleSheet(
         "QTextEdit {"
-        "    background-color: #d0d0d0;"
-        "    border: 1px solid #999999;"
-        "    padding: 5px;"
-        "    line-height: 1.2;"
-        "    color: #000000;"
+        "    background-color: #d0d0d0 !important;"
+        "    border: 1px solid #999999 !important;"
+        "    padding: 5px !important;"
+        "    line-height: 1.2 !important;"
+        "    color: #000000 !important;"
         "}"
     );
+    
+    // Force palette update to override system themes
+    QPalette palette = m_outputText->palette();
+    palette.setColor(QPalette::Base, QColor("#d0d0d0"));
+    palette.setColor(QPalette::Window, QColor("#d0d0d0"));
+    m_outputText->setPalette(palette);
     
     outputLayout->addWidget(m_outputText);
 
@@ -197,16 +204,16 @@ void KernelRunner::loadKernelList()
         "N-Body Simulation"};
 
     QStringList descriptions = {
-        "Simple vector addition kernel demonstrating basic GPU operations",
-        "Matrix multiplication using shared memory optimization",
-        "Parallel reduction algorithm for finding sum/max/min",
-        "2D convolution with configurable kernel size",
-        "Monte Carlo simulation for numerical integration",
-        "Advanced FFT implementation with multiple optimizations",
-        "Demonstrates advanced thread cooperation patterns",
-        "Dynamic memory allocation and management on GPU",
-        "3D FFT implementation for volumetric data",
-        "N-body gravitational simulation with optimizations"};
+        "Vector Addition: Adds two arrays element by element. The simplest GPU operation - like having thousands of calculators working in parallel to add corresponding numbers from two lists.",
+        "Matrix Multiplication: Multiplies two matrices together. Used in machine learning, graphics, and scientific computing. Shows how GPUs excel at mathematical operations with smart memory usage.",
+        "Parallel Reduction: Finds the sum, maximum, or minimum of a large array. Demonstrates how to combine results from thousands of parallel threads efficiently.",
+        "2D Convolution: Applies filters to images (like blur, sharpen, edge detection). The foundation of image processing and computer vision - shows how GPUs process pixels in parallel.",
+        "Monte Carlo: Uses random sampling to solve mathematical problems. Like throwing darts at a dartboard to calculate pi - demonstrates GPU's power for statistical simulations.",
+        "Advanced FFT: Fast Fourier Transform for signal processing. Converts signals between time and frequency domains - used in audio processing, compression, and scientific analysis.",
+        "Advanced Threading: Shows sophisticated thread cooperation patterns. Demonstrates how thousands of GPU threads can work together safely without conflicts.",
+        "Dynamic Memory: Shows how to allocate and manage memory on the GPU during execution. Important for applications that don't know memory requirements beforehand.",
+        "3D FFT: Three-dimensional Fast Fourier Transform for volumetric data. Used in medical imaging, weather simulation, and 3D signal processing.",
+        "N-Body Simulation: Simulates gravitational forces between particles (like planets, stars, or molecules). Shows GPU's power for physics simulations and scientific computing."};
 
     QStringList categories = {
         "Basic", "Basic", "Basic", "Basic", "Basic",

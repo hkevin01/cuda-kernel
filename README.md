@@ -10,13 +10,21 @@ A comprehensive collection of GPU kernels implemented in HIP/CUDA with a Qt-base
 - **CMake** 3.16 or later
 - **C++14** compatible compiler
 
-### Build Everything
+### Build and Run
 ```bash
-# Build all working components
-./scripts/build_working.sh --clean
+# Quick start - build and run GUI (auto-detects platform)
+./run.sh
 
-# Run the GUI
-./build_gui/bin/gpu_kernel_gui
+# Specific platform
+./run.sh -p hip        # For AMD GPUs
+./run.sh -p cuda       # For NVIDIA GPUs
+
+# Force rebuild
+./run.sh -b
+
+# Build specific components
+./scripts/build/build_gui_hip.sh    # Build GUI with HIP
+./scripts/build/build_kernels_safely.sh  # Build kernels safely
 ```
 
 ## 📁 Project Structure
@@ -31,27 +39,46 @@ cuda-kernel/
 │   ├── 05_monte_carlo/          # Statistical computation
 │   ├── 07_advanced_threading/   # Thread synchronization
 │   ├── 08_dynamic_memory/       # Memory management
+│   ├── 11_nbody_simulation/     # N-body physics
 │   └── common/                  # Shared utilities
 ├── gui/                    # Qt-based GUI application
-├── build_gui/             # GUI build output
-├── build_simple/          # Kernel build output
-└── scripts/               # Build and utility scripts
+├── tests/                  # Unit test source code
+├── docs/                   # Documentation and status files
+├── logs/                   # Runtime and test logs
+├── scripts/               # Organized build and utility scripts
+│   ├── build/                  # Build scripts
+│   ├── testing/               # Test scripts
+│   ├── gui/                   # GUI launch scripts
+│   └── verification/          # Verification scripts
+├── build*/                # Build output directories
+└── run.sh                 # Main launcher script
 ```
 
 ## 🔧 Build Options
 
-### Unified Build (Recommended)
+### Quick Build (Recommended)
 ```bash
-# Build all working components
-./scripts/build_working.sh
+# Auto-detect platform and build
+./run.sh
 
-# Options
-./scripts/build_working.sh --clean    # Clean build
-./scripts/build_working.sh --debug    # Debug build
-./scripts/build_working.sh -j 8       # Use 8 parallel jobs
+# Force rebuild with specific platform
+./run.sh -b -p hip     # Rebuild for AMD GPUs
+./run.sh -b -p cuda    # Rebuild for NVIDIA GPUs
 ```
 
-### Individual Component Builds
+### Organized Build Scripts
+```bash
+# GPU-specific builds
+./scripts/build/build_gui_hip.sh        # GUI with HIP/ROCm
+./scripts/build/build_hip.sh            # HIP kernels
+./scripts/build/build_kernels_safely.sh # Safe kernel build
+
+# Legacy builds
+./scripts/build_working.sh --clean      # Build all working components
+./scripts/build_unified.sh              # Unified build system
+```
+
+### Manual Component Builds
 ```bash
 # Build GUI only
 mkdir build_gui && cd build_gui
@@ -59,7 +86,7 @@ cmake ../gui && make
 
 # Build individual kernels
 cd src/01_vector_addition
-hipcc -O3 -std=c++14 -I../common -o ../../build_simple/bin/vector_addition \
+hipcc -O3 -std=c++14 -I../common -o ../../build/bin/vector_addition \
     main_hip.cpp vector_addition_hip.hip ../common/*.cpp
 ```
 
