@@ -50,7 +50,6 @@ set(GUI_SOURCES
     gui/kernel_runner.cpp
     gui/performance_widget.cpp
     gui/result_viewer.cpp
-    gui/test_runner.cpp
     gui/example_tabs.cpp
     gui/example_loader.cpp
     gui/resources.qrc

@@ -17,7 +17,6 @@
 #include "kernel_runner.h"
 #include "result_viewer.h"
 #include "performance_widget.h"
-#include "test_runner.h"
 #include "example_tabs.h"
 
 QT_BEGIN_NAMESPACE
@@ -50,7 +49,6 @@ private slots:
     void showStatusMessage(const QString &message);
     void updateProgress(int value);
     void onKernelFinished(const QString &kernelName, bool success, const QString &result);
-    void onTestFinished(const QString &testName, bool success, const QString &result);
     void onPerformanceDataUpdated(const QVariantMap &data);
     void toggleSystemTray();
     void systemTrayActivated(QSystemTrayIcon::ActivationReason reason);
@@ -72,7 +70,6 @@ private:
     KernelRunner *m_kernelRunner;
     ResultViewer *m_resultViewer;
     PerformanceWidget *m_performanceWidget;
-    TestRunner *m_testRunner;
     ExampleTabs *m_exampleTabs;
 
     // Menu and Toolbar

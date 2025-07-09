@@ -237,14 +237,12 @@ void MainWindow::createTabs()
     m_kernelRunner = new KernelRunner(this);
     m_resultViewer = new ResultViewer(this);
     m_performanceWidget = new PerformanceWidget(this);
-    m_testRunner = new TestRunner(this);
     m_exampleTabs = new ExampleTabs(this);
 
-    m_tabWidget->addTab(m_kernelRunner, tr("Kernel Runner"));
     m_tabWidget->addTab(m_exampleTabs, tr("Examples"));
+    m_tabWidget->addTab(m_kernelRunner, tr("Kernel Runner"));
     m_tabWidget->addTab(m_resultViewer, tr("Results"));
     m_tabWidget->addTab(m_performanceWidget, tr("Performance"));
-    m_tabWidget->addTab(m_testRunner, tr("Tests"));
 }
 
 void MainWindow::setupConnections()
@@ -254,10 +252,6 @@ void MainWindow::setupConnections()
             this, &MainWindow::onKernelFinished);
     connect(m_kernelRunner, &KernelRunner::progressUpdated,
             this, &MainWindow::updateProgress);
-
-    // Connect test runner signals
-    connect(m_testRunner, &TestRunner::testFinished,
-            this, &MainWindow::onTestFinished);
     connect(m_testRunner, &TestRunner::progressUpdated,
             this, &MainWindow::updateProgress);
 
@@ -358,14 +352,6 @@ void MainWindow::onKernelFinished(const QString &kernelName, bool success, const
         m_systemTrayIcon->showMessage(tr("Kernel Failed"), message,
                                       QSystemTrayIcon::Warning, 2000);
     }
-}
-
-void MainWindow::onTestFinished(const QString &testName, bool success, const QString &result)
-{
-    QString message = success ? tr("Test '%1' passed").arg(testName) : tr("Test '%1' failed").arg(testName);
-
-    showStatusMessage(message);
-    m_resultViewer->addResult(testName, success, result);
 }
 
 void MainWindow::onPerformanceDataUpdated(const QVariantMap &data)
