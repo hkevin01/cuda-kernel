@@ -27,7 +27,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 namespace {
 struct qt_meta_stringdata_KernelRunner_t {
-    uint offsetsAndSizes[40];
+    uint offsetsAndSizes[42];
     char stringdata0[13];
     char stringdata1[15];
     char stringdata2[1];
@@ -48,6 +48,7 @@ struct qt_meta_stringdata_KernelRunner_t {
     char stringdata17[6];
     char stringdata18[16];
     char stringdata19[15];
+    char stringdata20[15];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_KernelRunner_t::offsetsAndSizes) + ofs), len 
@@ -72,7 +73,8 @@ Q_CONSTINIT static const qt_meta_stringdata_KernelRunner_t qt_meta_stringdata_Ke
         QT_MOC_LITERAL(218, 22),  // "QProcess::ProcessError"
         QT_MOC_LITERAL(241, 5),  // "error"
         QT_MOC_LITERAL(247, 15),  // "onProcessOutput"
-        QT_MOC_LITERAL(263, 14)   // "updateProgress"
+        QT_MOC_LITERAL(263, 14),  // "updateProgress"
+        QT_MOC_LITERAL(278, 14)   // "cleanupProcess"
     },
     "KernelRunner",
     "kernelFinished",
@@ -93,7 +95,8 @@ Q_CONSTINIT static const qt_meta_stringdata_KernelRunner_t qt_meta_stringdata_Ke
     "QProcess::ProcessError",
     "error",
     "onProcessOutput",
-    "updateProgress"
+    "updateProgress",
+    "cleanupProcess"
 };
 #undef QT_MOC_LITERAL
 } // unnamed namespace
@@ -104,7 +107,7 @@ Q_CONSTINIT static const uint qt_meta_data_KernelRunner[] = {
       10,       // revision
        0,       // classname
        0,    0, // classinfo
-       9,   14, // methods
+      10,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -112,17 +115,18 @@ Q_CONSTINIT static const uint qt_meta_data_KernelRunner[] = {
        2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    3,   68,    2, 0x06,    1 /* Public */,
-       6,    1,   75,    2, 0x06,    5 /* Public */,
+       1,    3,   74,    2, 0x06,    1 /* Public */,
+       6,    1,   81,    2, 0x06,    5 /* Public */,
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       8,    0,   78,    2, 0x08,    7 /* Private */,
-       9,    0,   79,    2, 0x08,    8 /* Private */,
-      10,    0,   80,    2, 0x08,    9 /* Private */,
-      11,    2,   81,    2, 0x08,   10 /* Private */,
-      15,    1,   86,    2, 0x08,   13 /* Private */,
-      18,    0,   89,    2, 0x08,   15 /* Private */,
-      19,    0,   90,    2, 0x08,   16 /* Private */,
+       8,    0,   84,    2, 0x08,    7 /* Private */,
+       9,    0,   85,    2, 0x08,    8 /* Private */,
+      10,    0,   86,    2, 0x08,    9 /* Private */,
+      11,    2,   87,    2, 0x08,   10 /* Private */,
+      15,    1,   92,    2, 0x08,   13 /* Private */,
+      18,    0,   95,    2, 0x08,   15 /* Private */,
+      19,    0,   96,    2, 0x08,   16 /* Private */,
+      20,    0,   97,    2, 0x08,   17 /* Private */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::QString, QMetaType::Bool, QMetaType::QString,    3,    4,    5,
@@ -134,6 +138,7 @@ Q_CONSTINIT static const uint qt_meta_data_KernelRunner[] = {
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int, 0x80000000 | 13,   12,   14,
     QMetaType::Void, 0x80000000 | 16,   17,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
 
@@ -173,6 +178,8 @@ Q_CONSTINIT const QMetaObject KernelRunner::staticMetaObject = { {
         // method 'onProcessOutput'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'updateProgress'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'cleanupProcess'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
     nullptr
@@ -193,6 +200,7 @@ void KernelRunner::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id
         case 6: _t->onProcessError((*reinterpret_cast< std::add_pointer_t<QProcess::ProcessError>>(_a[1]))); break;
         case 7: _t->onProcessOutput(); break;
         case 8: _t->updateProgress(); break;
+        case 9: _t->cleanupProcess(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -233,13 +241,13 @@ int KernelRunner::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 10;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 9)
+        if (_id < 10)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 9;
+        _id -= 10;
     }
     return _id;
 }

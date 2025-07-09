@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>Matrix Multiplication</name>
+    <category>Basic</category>
+    <sourceFile>src/02_matrix_multiplication/matrix_mul.cu</sourceFile>
+    <description>
+        <title>Matrix Multiplication 🧮✖️ - The Workhorse of Modern Computing</title>
+        <overview>
+            This example demonstrates optimized matrix multiplication using GPU shared memory - 
+            the fundamental operation behind machine learning, computer graphics, and scientific computing. 
+            Like organizing an assembly line where workers efficiently share tools, this example shows 
+            how thousands of GPU threads collaborate to multiply massive matrices at lightning speed.
+        </overview>
+        <analogy>
+            <strong>Think of it like this:</strong> Imagine a giant spreadsheet multiplication factory. 
+            Instead of one person multiplying row×column by hand, you have 1000 teams working simultaneously. 
+            Each team shares a whiteboard (shared memory) to temporarily store the numbers they're working 
+            with, dramatically reducing trips to the main filing cabinet (global memory).
+        </analogy>
+        <features>
+            <feature><strong>Shared Memory Optimization:</strong> Fast on-chip memory reduces global memory accesses by 100x</feature>
+            <feature><strong>2D Thread Organization:</strong> Natural mapping of threads to matrix elements</feature>
+            <feature><strong>Memory Coalescing:</strong> Optimized access patterns for maximum bandwidth</feature>
+            <feature><strong>Tiled Algorithm:</strong> Divide-and-conquer approach for large matrices</feature>
+            <feature><strong>Performance Analysis:</strong> Compare CPU vs GPU execution with timing measurements</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>🚀 Shared Memory</title>
+                <description>Ultra-fast on-chip memory shared by threads in a block - 100x faster than global memory</description>
+            </concept>
+            <concept>
+                <title>🚀 Thread Block 2D Layout</title>
+                <description>Organizing threads in a 2D grid that naturally maps to matrix structure</description>
+            </concept>
+            <concept>
+                <title>🚀 Memory Tiling</title>
+                <description>Breaking large matrices into smaller tiles that fit in shared memory</description>
+            </concept>
+            <concept>
+                <title>🚀 Synchronization Barriers</title>
+                <description>__syncthreads() ensures all threads finish loading data before computation begins</description>
+            </concept>
+            <concept>
+                <title>🚀 Memory Coalescing</title>
+                <description>Threads access consecutive memory locations for maximum bandwidth efficiency</description>
+            </concept>
+        </concepts>
+        <applications>
+            <application>
+                <title>🤖 Machine Learning</title>
+                <description>Neural network training - every layer forward/backward pass involves matrix multiplication</description>
+            </application>
+            <application>
+                <title>🎮 Computer Graphics</title>
+                <description>3D transformations, lighting calculations, and shader operations rely on matrix math</description>
+            </application>
+            <application>
+                <title>🔬 Scientific Computing</title>
+                <description>Solving systems of equations, finite element analysis, and numerical simulations</description>
+            </application>
+            <application>
+                <title>💰 Financial Modeling</title>
+                <description>Risk analysis, portfolio optimization, and derivative pricing calculations</description>
+            </application>
+            <application>
+                <title>🧬 Bioinformatics</title>
+                <description>Sequence alignment, protein folding simulations, and genomic data analysis</description>
+            </application>
+        </applications>
+        <performance>
+            <consideration>Shared memory bank conflicts - ensure threads don't access the same memory bank simultaneously</consideration>
+            <consideration>Optimal tile size - balance between shared memory usage and arithmetic intensity</consideration>
+            <consideration>Thread divergence - all threads in a warp should follow the same execution path</consideration>
+            <consideration>Memory access patterns - coalesced access can improve bandwidth by 10x</consideration>
+            <consideration>Occupancy optimization - maximize threads per multiprocessor for better utilization</consideration>
+        </performance>
+        <importance>
+            <why>
+                Matrix multiplication is the backbone of modern computing. It's the most important operation 
+                in machine learning (every neural network layer), computer graphics (every 3D transformation), 
+                and scientific computing (solving virtually every numerical problem). Understanding optimized 
+                matrix multiplication on GPU teaches you the fundamental performance principles that apply 
+                to all high-performance computing.
+            </why>
+            <performance>
+                A well-optimized GPU matrix multiplication can achieve 1000x speedup over naive CPU code. 
+                Modern GPUs can perform trillions of floating-point operations per second (TFLOPS), 
+                making real-time machine learning and scientific simulations possible. This is why 
+                every major AI breakthrough relies on GPU acceleration.
+            </performance>
+        </importance>
+    </description>
+</example>

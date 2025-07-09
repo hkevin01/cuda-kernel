@@ -200,6 +200,30 @@ gpu_kernel_gui_autogen/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu_kernel_gui_autogen.dir/build.make CMakeFiles/gpu_kernel_gui_autogen.dir/build
 .PHONY : gpu_kernel_gui_autogen/fast
 
+example_loader.o: example_loader.cpp.o
+.PHONY : example_loader.o
+
+# target to build an object file
+example_loader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu_kernel_gui.dir/build.make CMakeFiles/gpu_kernel_gui.dir/example_loader.cpp.o
+.PHONY : example_loader.cpp.o
+
+example_loader.i: example_loader.cpp.i
+.PHONY : example_loader.i
+
+# target to preprocess a source file
+example_loader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu_kernel_gui.dir/build.make CMakeFiles/gpu_kernel_gui.dir/example_loader.cpp.i
+.PHONY : example_loader.cpp.i
+
+example_loader.s: example_loader.cpp.s
+.PHONY : example_loader.s
+
+# target to generate assembly for a file
+example_loader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gpu_kernel_gui.dir/build.make CMakeFiles/gpu_kernel_gui.dir/example_loader.cpp.s
+.PHONY : example_loader.cpp.s
+
 example_tabs.o: example_tabs.cpp.o
 .PHONY : example_tabs.o
 
@@ -431,6 +455,9 @@ help:
 	@echo "... gpu_kernel_gui_autogen"
 	@echo "... gpu_kernel_gui_autogen_timestamp_deps"
 	@echo "... gpu_kernel_gui"
+	@echo "... example_loader.o"
+	@echo "... example_loader.i"
+	@echo "... example_loader.s"
 	@echo "... example_tabs.o"
 	@echo "... example_tabs.i"
 	@echo "... example_tabs.s"

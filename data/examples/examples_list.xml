@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<examples>
+    <example file="vector_addition.xml" />
+    <example file="matrix_multiplication.xml" />
+    <example file="parallel_reduction.xml" />
+    <example file="2d_convolution.xml" />
+    <example file="monte_carlo.xml" />
+    <example file="advanced_fft.xml" />
+    <example file="advanced_threading.xml" />
+    <example file="dynamic_memory.xml" />
+    <example file="warp_primitives.xml" />
+    <example file="3d_fft.xml" />
+    <example file="nbody_simulation.xml" />
+</examples>

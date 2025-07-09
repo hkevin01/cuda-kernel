@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>Advanced FFT</name>
+    <category>Advanced</category>
+    <sourceFile>src/06_advanced_fft/fft_kernels.hip</sourceFile>
+    <description>
+        <title>Advanced FFT 📊🔄 - The Mathematical Swiss Army Knife of Signal Processing</title>
+        <overview>
+            This example demonstrates the Fast Fourier Transform (FFT) - one of the most important 
+            algorithms in computing, converting signals between time and frequency domains. Like having 
+            X-ray vision that reveals hidden frequency patterns in data, FFT powers everything from 
+            MP3 compression to wireless communications to earthquake analysis. GPU acceleration makes 
+            real-time spectral analysis possible for massive datasets.
+        </overview>
+        <analogy>
+            <strong>Think of it like this:</strong> Imagine analyzing a complex symphony by separating 
+            it into individual instrument frequencies - violin, piano, drums, etc. FFT does exactly 
+            this for any signal: it takes a time-based waveform and decomposes it into its constituent 
+            frequencies. With thousands of GPU threads working in parallel, this musical analysis 
+            happens in real-time, enabling everything from noise cancellation to medical imaging.
+        </analogy>
+        <features>
+            <feature><strong>Cooley-Tukey Algorithm:</strong> Optimized divide-and-conquer approach for maximum efficiency</feature>
+            <feature><strong>Shared Memory Optimization:</strong> Minimize global memory access through intelligent data staging</feature>
+            <feature><strong>Multi-dimensional Support:</strong> Handle 1D, 2D, and 3D FFTs for diverse applications</feature>
+            <feature><strong>Precision Options:</strong> Single and double precision for accuracy vs speed trade-offs</feature>
+            <feature><strong>Batch Processing:</strong> Process multiple signals simultaneously for maximum throughput</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>FFT Algorithm</title>
+                <description>Cooley-Tukey butterfly operations</description>
+            </concept>
+            <concept>
+                <title>🦋 Butterfly Operations</title>
+                <description>Core FFT computational pattern - elegant divide-and-conquer that reduces O(n²) to O(n log n)</description>
+            </concept>
+            <concept>
+                <title>🌀 Twiddle Factors</title>
+                <description>Pre-computed complex exponentials that encode the trigonometric relationships in FFT</description>
+            </concept>
+            <concept>
+                <title>⚡ Memory Optimization</title>
+                <description>Shared memory staging and bit-reversal addressing for optimal data access patterns</description>
+            </concept>
+            <concept>
+                <title>🔄 In-Place Computation</title>
+                <description>Minimizing memory usage by performing FFT transformations without additional storage</description>
+            </concept>
+            <concept>
+                <title>📐 Complex Arithmetic</title>
+                <description>Efficient GPU implementations of complex number multiplication and addition</description>
+            </concept>
+        </concepts>
+        <applications>
+            <application>
+                <title>🎵 Audio Processing</title>
+                <description>Real-time audio effects, noise reduction, and music analysis for streaming and production</description>
+            </application>
+            <application>
+                <title>📡 Wireless Communications</title>
+                <description>OFDM, LTE, 5G signal processing for mobile networks and satellite communications</description>
+            </application>
+            <application>
+                <title>🖼️ Image Processing</title>
+                <description>Image filtering, compression, and enhancement in medical imaging and photography</description>
+            </application>
+            <application>
+                <title>🔬 Scientific Computing</title>
+                <description>Quantum mechanics simulations, crystallography, and computational chemistry</description>
+            </application>
+            <application>
+                <title>🌊 Seismic Analysis</title>
+                <description>Earthquake monitoring, oil exploration, and geological survey processing</description>
+            </application>
+            <application>
+                <title>🏥 Medical Imaging</title>
+                <description>MRI reconstruction, CT processing, and ultrasound signal analysis</description>
+            </application>
+        </applications>
+        <performance>
+            <consideration>Memory bank conflicts - organize shared memory access to avoid simultaneous bank usage</consideration>
+            <consideration>Bit-reversal addressing - efficient permutation algorithms for FFT input/output ordering</consideration>
+            <consideration>Complex arithmetic optimization - minimize floating-point operations in butterfly stages</consideration>
+            <consideration>Cache efficiency - optimize memory access patterns for different FFT sizes</consideration>
+            <consideration>Numerical stability - manage precision loss in large transforms and iterative computations</consideration>
+        </performance>
+        <importance>
+            <why>
+                FFT is one of the most important algorithms of the 20th century, enabling the digital 
+                revolution in communications, entertainment, and scientific computing. From JPEG compression 
+                to WiFi signals to MRI scans, FFT is everywhere. GPU acceleration makes real-time spectral 
+                analysis practical, enabling applications that were impossible with CPU-only implementations.
+            </why>
+            <performance>
+                GPU-accelerated FFT can process millions of samples in real-time, enabling applications 
+                like real-time spectrum analysis, live audio processing, and immediate medical imaging 
+                reconstruction. What once required specialized signal processing hardware can now be 
+                done in software on commodity GPUs, democratizing advanced signal processing capabilities.
+            </performance>
+        </importance>
+    </description>
+</example>

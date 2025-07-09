@@ -290,6 +290,7 @@
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QDateTime \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QMap \
+  /usr/include/x86_64-linux-gnu/qt6/QtCore/QPointer \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QProcess \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QSettings \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QString \
@@ -352,6 +353,7 @@
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qobjectdefs_impl.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qpair.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qpoint.h \
+  /usr/include/x86_64-linux-gnu/qt6/QtCore/qpointer.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qprocess.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qprocessordetection.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qrect.h \

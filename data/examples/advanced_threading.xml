@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>Advanced Threading</name>
+    <category>Advanced</category>
+    <sourceFile>src/07_advanced_threading/advanced_threading_hip.hip</sourceFile>
+    <description>
+        <title>Advanced Threading 🧵🤝 - Orchestra of Synchronized GPU Cooperation</title>
+        <overview>
+            This example demonstrates sophisticated thread cooperation and synchronization patterns 
+            that enable thousands of GPU threads to work together safely and efficiently. Like 
+            conducting a symphony orchestra where musicians must perfectly coordinate their timing, 
+            advanced threading shows how GPU threads can share data, synchronize actions, and 
+            coordinate complex multi-stage algorithms without conflicts or race conditions.
+        </overview>
+        <analogy>
+            <strong>Think of it like this:</strong> Imagine coordinating a massive kitchen with 1000 chefs 
+            preparing a complex meal. Some chefs prepare ingredients (producers), others cook dishes (consumers), 
+            and everyone must coordinate perfectly - no chef can start the sauce until ingredients are ready, 
+            and all dishes must finish simultaneously. Advanced threading provides the coordination 
+            mechanisms that make this chaotic potential into harmonious cooperation.
+        </analogy>
+        <features>
+            <feature><strong>Producer-Consumer Patterns:</strong> Threads safely share data through sophisticated coordination</feature>
+            <feature><strong>Barrier Synchronization:</strong> Ensure all threads reach checkpoint before proceeding</feature>
+            <feature><strong>Cooperative Groups:</strong> Modern thread organization beyond simple block structures</feature>
+            <feature><strong>Warp-Level Programming:</strong> Ultra-efficient coordination within 32-thread warps</feature>
+            <feature><strong>Dynamic Workload Balancing:</strong> Adaptive thread assignment for irregular problems</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>Thread Cooperation</title>
+                <description>Shared memory and synchronization</description>
+            </concept>
+            <concept>
+                <title>🤝 Thread Cooperation Patterns</title>
+                <description>Shared memory protocols and data passing mechanisms for safe multi-thread coordination</description>
+            </concept>
+            <concept>
+                <title>🚧 Synchronization Barriers</title>
+                <description>__syncthreads() and cooperative groups ensure all threads reach synchronization points together</description>
+            </concept>
+            <concept>
+                <title>🎯 Warp-Level Primitives</title>
+                <description>__shfl(), __ballot(), __any() - hardware-accelerated communication within 32-thread warps</description>
+            </concept>
+            <concept>
+                <title>🔄 Producer-Consumer Queues</title>
+                <description>Lock-free data structures for high-throughput thread communication</description>
+            </concept>
+            <concept>
+                <title>⚖️ Load Balancing</title>
+                <description>Dynamic work distribution algorithms for irregular and unpredictable workloads</description>
+            </concept>
+        </concepts>
+        <applications>
+            <application>
+                <title>🌊 Stream Processing</title>
+                <description>Real-time data pipelines where threads process different stages of streaming data</description>
+            </application>
+            <application>
+                <title>🔗 Graph Algorithms</title>
+                <description>Complex graph traversal and analysis requiring dynamic thread coordination</description>
+            </application>
+            <application>
+                <title>🧠 Neural Network Training</title>
+                <description>Multi-stage ML pipelines with data dependencies between processing phases</description>
+            </application>
+            <application>
+                <title>🎮 Game Engine Physics</title>
+                <description>Complex collision detection and physics simulations with variable computational loads</description>
+            </application>
+            <application>
+                <title>🔬 Scientific Simulations</title>
+                <description>Multi-physics modeling where different threads handle different physical phenomena</description>
+            </application>
+            <application>
+                <title>💰 High-Frequency Trading</title>
+                <description>Financial algorithms requiring ultra-low latency and precise timing coordination</description>
+            </application>
+        </applications>
+        <performance>
+            <consideration>Synchronization overhead - minimize barrier usage while maintaining correctness</consideration>
+            <consideration>Warp divergence - keep related threads in sync for optimal execution efficiency</consideration>
+            <consideration>Memory contention - design data structures to minimize thread conflicts</consideration>
+            <consideration>Load imbalance - ensure threads have similar workloads to avoid idle time</consideration>
+            <consideration>Occupancy optimization - balance synchronization needs with thread count per block</consideration>
+        </performance>
+        <importance>
+            <why>
+                Advanced threading is what separates basic parallel programming from truly sophisticated 
+                GPU applications. Real-world problems rarely have perfectly uniform workloads - they 
+                involve dependencies, coordination, and complex data flow patterns. Mastering advanced 
+                threading enables you to tackle the most challenging parallel programming problems and 
+                build applications that can adapt to varying computational demands.
+            </why>
+            <performance>
+                Well-designed thread cooperation can achieve near-linear scaling even with complex 
+                dependencies and synchronization requirements. Advanced threading techniques can 
+                maintain 90%+ GPU utilization even in applications with irregular workloads, making 
+                previously impossible real-time applications practical and efficient.
+            </performance>
+        </importance>
+    </description>
+</example>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>2D Convolution</name>
+    <category>Basic</category>
+    <sourceFile>src/04_convolution_2d/convolution.cu</sourceFile>
+    <description>
+        <title>2D Convolution 🖼️🔄 - The Foundation of Computer Vision and AI</title>
+        <overview>
+            This example demonstrates 2D convolution - the core operation behind image processing, 
+            computer vision, and convolutional neural networks. Like applying a magical lens that 
+            transforms every pixel based on its neighbors, convolution enables edge detection, 
+            blur effects, feature extraction, and the revolutionary deep learning models that 
+            power modern AI systems.
+        </overview>
+        <analogy>
+            <strong>Think of it like this:</strong> Imagine you're a photo editor with a special magnifying glass. 
+            You slide this glass over every spot on a photo, and wherever you look, the glass applies a 
+            mathematical transformation based on the pixel and its neighbors. A 3×3 "sharpening glass" might 
+            enhance edges, while a "blur glass" might smooth details. With thousands of GPU threads, 
+            each thread handles one pixel position simultaneously - processing entire images in milliseconds!
+        </analogy>
+        <features>
+            <feature><strong>2D Memory Optimization:</strong> Efficient access patterns for image data processing</feature>
+            <feature><strong>Boundary Handling:</strong> Smart edge processing with padding, clamping, or wrapping</feature>
+            <feature><strong>Shared Memory Tiling:</strong> Cache frequently accessed pixels for maximum performance</feature>
+            <feature><strong>Kernel Size Flexibility:</strong> Support for different convolution filter sizes</feature>
+            <feature><strong>Real-time Performance:</strong> Process high-resolution images at video frame rates</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>🎨 2D Memory Layout</title>
+                <description>Row-major indexing and optimal memory access patterns for image data</description>
+            </concept>
+            <concept>
+                <title>🖼️ Boundary Handling</title>
+                <description>Edge processing strategies: zero-padding, clamping, and wraparound modes</description>
+            </concept>
+            <concept>
+                <title>⚡ Shared Memory Tiling</title>
+                <description>Loading image tiles into fast shared memory to reuse pixel data across threads</description>
+            </concept>
+            <concept>
+                <title>🔄 Convolution Mathematics</title>
+                <description>Element-wise multiplication and summation for feature detection and transformation</description>
+            </concept>
+            <concept>
+                <title>🧵 Thread-to-Pixel Mapping</title>
+                <description>Optimal assignment of GPU threads to output pixels for maximum parallelism</description>
+            </concept>
+        </concepts>
+        <applications>
+            <application>
+                <title>🤖 Convolutional Neural Networks</title>
+                <description>The backbone of modern AI - every CNN layer performs millions of convolutions for image recognition</description>
+            </application>
+            <application>
+                <title>📷 Image Processing</title>
+                <description>Real-time filters, effects, and enhancements in photo editing and camera applications</description>
+            </application>
+            <application>
+                <title>🔍 Computer Vision</title>
+                <description>Edge detection, feature extraction, and object recognition in autonomous vehicles and robotics</description>
+            </application>
+            <application>
+                <title>🎮 Game Graphics</title>
+                <description>Post-processing effects, blur, sharpening, and real-time visual enhancements</description>
+            </application>
+            <application>
+                <title>🏥 Medical Imaging</title>
+                <description>MRI and CT scan processing, tumor detection, and diagnostic image enhancement</description>
+            </application>
+            <application>
+                <title>🛰️ Satellite Imagery</title>
+                <description>Environmental monitoring, agricultural analysis, and geographic information systems</description>
+            </application>
+        </applications>
+        <performance>
+            <consideration>Memory coalescing - ensure adjacent threads access adjacent memory locations</consideration>
+            <consideration>Shared memory bank conflicts - organize data to avoid simultaneous bank access</consideration>
+            <consideration>Occupancy optimization - balance shared memory usage with thread count per block</consideration>
+            <consideration>Cache efficiency - reuse loaded pixels across multiple output calculations</consideration>
+            <consideration>Divergence minimization - ensure uniform execution paths within warps</consideration>
+        </performance>
+        <importance>
+            <why>
+                2D convolution is the cornerstone of modern artificial intelligence and computer vision. 
+                It's the operation that enables machines to "see" and understand images. Every breakthrough 
+                in AI vision - from facial recognition to medical diagnosis to autonomous driving - 
+                relies fundamentally on efficient convolution computations. Understanding GPU-accelerated 
+                convolution is essential for anyone working in AI, computer vision, or image processing.
+            </why>
+            <performance>
+                GPU-accelerated convolution can process 4K images in milliseconds, enabling real-time 
+                AI inference and video processing. A single GPU can perform billions of convolution 
+                operations per second, making complex computer vision applications practical on consumer 
+                devices. This performance revolution is what made the current AI boom possible.
+            </performance>
+        </importance>
+    </description>
+</example>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>Vector Addition</name>
+    <category>Basic</category>
+    <sourceFile>src/01_vector_addition/vector_addition.cu</sourceFile>
+    <description>
+        <title>Vector Addition Kernel</title>
+        <overview>
+            This example demonstrates the fundamental concept of parallel vector addition on GPU. 
+            It shows how to:
+        </overview>
+        <features>
+            <feature>Allocate memory on both CPU and GPU</feature>
+            <feature>Transfer data between CPU and GPU</feature>
+            <feature>Launch a simple kernel with proper grid and block dimensions</feature>
+            <feature>Verify results and measure performance</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>Memory Management</title>
+                <description>cudaMalloc, cudaMemcpy, cudaFree</description>
+            </concept>
+            <concept>
+                <title>Kernel Launch</title>
+                <description>&lt;&lt;&lt;grid, block&gt;&gt;&gt; syntax</description>
+            </concept>
+            <concept>
+                <title>Thread Indexing</title>
+                <description>threadIdx, blockIdx, blockDim</description>
+            </concept>
+            <concept>
+                <title>Synchronization</title>
+                <description>cudaDeviceSynchronize</description>
+            </concept>
+        </concepts>
+        <performance>
+            <consideration>Memory coalescing for optimal bandwidth</consideration>
+            <consideration>Proper grid and block sizing</consideration>
+            <consideration>Minimizing memory transfers</consideration>
+        </performance>
+    </description>
+</example>

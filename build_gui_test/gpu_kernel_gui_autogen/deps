@@ -3,6 +3,7 @@ gpu_kernel_gui_autogen/timestamp: \
 	/home/kevin/Projects/cuda-kernel/build_gui_test/CMakeFiles/3.28.3/CMakeCXXCompiler.cmake \
 	/home/kevin/Projects/cuda-kernel/build_gui_test/CMakeFiles/3.28.3/CMakeSystem.cmake \
 	/home/kevin/Projects/cuda-kernel/build_gui_test/gpu_kernel_gui_autogen/moc_predefs.h \
+	/home/kevin/Projects/cuda-kernel/gui/example_loader.h \
 	/home/kevin/Projects/cuda-kernel/gui/example_tabs.cpp \
 	/home/kevin/Projects/cuda-kernel/gui/example_tabs.h \
 	/home/kevin/Projects/cuda-kernel/gui/kernel_runner.cpp \
@@ -352,6 +353,7 @@ gpu_kernel_gui_autogen/timestamp: \
 	/usr/include/x86_64-linux-gnu/qt6/QtCore/QStringList \
 	/usr/include/x86_64-linux-gnu/qt6/QtCore/QTextStream \
 	/usr/include/x86_64-linux-gnu/qt6/QtCore/QTimer \
+	/usr/include/x86_64-linux-gnu/qt6/QtCore/QXmlStreamReader \
 	/usr/include/x86_64-linux-gnu/qt6/QtCore/qabstractitemmodel.h \
 	/usr/include/x86_64-linux-gnu/qt6/QtCore/qalgorithms.h \
 	/usr/include/x86_64-linux-gnu/qt6/QtCore/qanystringview.h \
@@ -457,6 +459,7 @@ gpu_kernel_gui_autogen/timestamp: \
 	/usr/include/x86_64-linux-gnu/qt6/QtCore/qvariant.h \
 	/usr/include/x86_64-linux-gnu/qt6/QtCore/qvarlengtharray.h \
 	/usr/include/x86_64-linux-gnu/qt6/QtCore/qversiontagging.h \
+	/usr/include/x86_64-linux-gnu/qt6/QtCore/qxmlstream.h \
 	/usr/include/x86_64-linux-gnu/qt6/QtGui/QAction \
 	/usr/include/x86_64-linux-gnu/qt6/QtGui/QClipboard \
 	/usr/include/x86_64-linux-gnu/qt6/QtGui/QFont \

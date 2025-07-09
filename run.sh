@@ -126,10 +126,11 @@ run_gui() {
     # Clear previous log file
     > logs/gui.log
     
-    print_success "Launching GPU Kernel Examples GUI..."
+    print_success "Launching GPU Kernel Examples GUI with XML-based descriptions..."
     print_status "Platform: $platform"
     print_status "Executable: $gui_path"
     print_status "Log file: logs/gui.log"
+    print_status "XML Data: data/examples/"
     
     # Set environment variable for platform instead of command line argument
     export GPU_PLATFORM=$platform

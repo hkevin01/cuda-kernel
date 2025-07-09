@@ -210,7 +210,7 @@ void KernelRunner::loadKernelList()
         "2D Convolution: Applies filters to images (like blur, sharpen, edge detection). The foundation of image processing and computer vision - shows how GPUs process pixels in parallel.",
         "Monte Carlo: Uses random sampling to solve mathematical problems. Like throwing darts at a dartboard to calculate pi - demonstrates GPU's power for statistical simulations.",
         "Advanced FFT: Fast Fourier Transform for signal processing. Converts signals between time and frequency domains - used in audio processing, compression, and scientific analysis.",
-        "Advanced Threading: Shows sophisticated thread cooperation patterns. Demonstrates how thousands of GPU threads can work together safely without conflicts.",
+        "Advanced Threading: Shows how thousands of GPU threads coordinate like a synchronized orchestra. Demonstrates warp-level programming (teams of 32 threads working in lockstep), thread cooperation patterns, and safe communication - like the difference between 1000 people working randomly vs perfectly coordinated.",
         "Dynamic Memory: Shows how to allocate and manage memory on the GPU during execution. Important for applications that don't know memory requirements beforehand.",
         "3D FFT: Three-dimensional Fast Fourier Transform for volumetric data. Used in medical imaging, weather simulation, and 3D signal processing.",
         "N-Body Simulation: Simulates gravitational forces between particles (like planets, stars, or molecules). Shows GPU's power for physics simulations and scientific computing."};
@@ -226,7 +226,7 @@ void KernelRunner::loadKernelList()
         "Image Size: Width/height of image to process (default: 512x512)\nKernel Size: Size of convolution filter (3x3, 5x5, etc.)",
         "Sample Count: Number of random samples (default: 1M samples)\nIterations: Monte Carlo rounds for better accuracy",
         "Signal Size: Length of signal for FFT (default: 1024 points)\nDimensions: 1D, 2D, or 3D FFT processing",
-        "Thread Count: Number of GPU threads (default: auto-detect)\nSync Pattern: Different synchronization strategies",
+        "Thread Count: Number of GPU threads working together (default: 8192 threads)\nIterations: Coordination rounds - how many times threads synchronize and cooperate\nWarp Operations: Teams of 32 threads doing lockstep operations\nSync Pattern: Different ways threads communicate (barriers, shared memory, warp-level)",
         "Memory Size: Amount of GPU memory to allocate (default: 100MB)\nAccess Pattern: Sequential, random, or coalesced access",
         "Volume Size: 3D data dimensions (default: 64x64x64)\nBatch Size: Number of 3D volumes to process",
         "Particle Count: Number of bodies in simulation (default: 1024)\nTime Steps: Number of simulation iterations"};

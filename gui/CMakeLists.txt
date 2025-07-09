@@ -2,12 +2,12 @@
 cmake_minimum_required(VERSION 3.20)
 
 # Find Qt6 (or Qt5 as fallback)
-find_package(Qt6 QUIET COMPONENTS Core Widgets Charts)
+find_package(Qt6 QUIET COMPONENTS Core Widgets Charts Xml)
 if(Qt6_FOUND)
     set(QT_VERSION 6)
     message(STATUS "Found Qt6")
 else()
-    find_package(Qt5 QUIET COMPONENTS Core Widgets Charts)
+    find_package(Qt5 QUIET COMPONENTS Core Widgets Charts Xml)
     if(Qt5_FOUND)
         set(QT_VERSION 5)
         message(STATUS "Found Qt5")
@@ -37,6 +37,8 @@ add_executable(gpu_kernel_gui
     test_runner.h
     example_tabs.cpp
     example_tabs.h
+    example_loader.cpp
+    example_loader.h
     resources.qrc
 )
 
@@ -46,12 +48,14 @@ if(QT_VERSION EQUAL 6)
         Qt6::Core 
         Qt6::Widgets 
         Qt6::Charts
+        Qt6::Xml
     )
 else()
     target_link_libraries(gpu_kernel_gui 
         Qt5::Core 
         Qt5::Widgets 
         Qt5::Charts
+        Qt5::Xml
     )
 endif()
 

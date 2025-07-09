@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>Warp Primitives</name>
+    <category>Advanced</category>
+    <sourceFile>src/09_warp_primitives/warp_primitives_hip.hip</sourceFile>
+    <description>
+        <title>Warp-Level Primitives - The GPU's High-Speed Communication System</title>
+        <analogy>
+            <strong>Think of it like this:</strong> Imagine 32 workers (threads) sitting at the same table who can instantly 
+            whisper information to each other without the manager (CPU) knowing. This is what warp primitives allow - 
+            lightning-fast communication between threads in the same warp (group of 32 threads).
+        </analogy>
+        <overview>
+            This example demonstrates the most powerful warp-level programming techniques that make modern GPU 
+            computing incredibly efficient. These primitives allow threads within a warp to:
+        </overview>
+        <features>
+            <feature><strong>Share data instantly</strong> using warp shuffle operations</feature>
+            <feature><strong>Make group decisions</strong> with warp vote functions</feature>
+            <feature><strong>Reduce computation time</strong> with warp-level reduction and scan</feature>
+            <feature><strong>Optimize algorithms</strong> that would be slow with traditional synchronization</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>🔧 Warp Shuffle (__shfl family)</title>
+                <description>Like passing notes instantly between specific seats at a table. 
+                __shfl_down(value, offset) lets thread N give its value to thread N+offset</description>
+            </concept>
+            <concept>
+                <title>🔧 Warp Vote (__all, __any, __ballot)</title>
+                <description>Like taking an instant vote where everyone raises their hand simultaneously. 
+                __all(condition) returns true only if ALL 32 threads meet the condition</description>
+            </concept>
+            <concept>
+                <title>🔧 Warp Reduction</title>
+                <description>Like 32 people each having a number and instantly finding their sum without any paperwork</description>
+            </concept>
+            <concept>
+                <title>🔧 Warp Synchronization</title>
+                <description>All 32 threads naturally stay in lockstep - no explicit synchronization needed!</description>
+            </concept>
+        </concepts>
+        <applications>
+            <application>
+                <title>🚀 Fast Parallel Sum</title>
+                <description>Add 32 numbers in just 5 steps instead of 31</description>
+            </application>
+            <application>
+                <title>🚀 Efficient Sorting</title>
+                <description>Sort small arrays within warps at blazing speed</description>
+            </application>
+            <application>
+                <title>🚀 Prefix Sum (Scan)</title>
+                <description>Calculate running totals instantly for financial calculations</description>
+            </application>
+            <application>
+                <title>🚀 Branch Optimization</title>
+                <description>Skip entire code sections when no thread in the warp needs them</description>
+            </application>
+            <application>
+                <title>🚀 Image Processing</title>
+                <description>Neighboring pixels can share data for filters and edge detection</description>
+            </application>
+        </applications>
+        <importance>
+            <why>
+                Traditional thread communication requires expensive synchronization. Warp primitives are essentially free - 
+                they happen in a single instruction cycle. This is like the difference between sending a letter (slow) 
+                versus telepathy (instant)!
+            </why>
+            <performance>
+                Using warp primitives can make algorithms 10-100x faster than naive implementations. They're the secret 
+                sauce behind many high-performance GPU libraries like cuBLAS and cuDNN.
+            </performance>
+        </importance>
+    </description>
+</example>

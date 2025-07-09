@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>3D FFT</name>
+    <category>Advanced</category>
+    <sourceFile>src/10_advanced_fft/fft3d_hip.hip</sourceFile>
+    <description>
+        <title>3D FFT Implementation</title>
+        <overview>
+            This example implements 3D Fast Fourier Transform for 
+            volumetric data processing:
+        </overview>
+        <features>
+            <feature>3D FFT algorithm implementation</feature>
+            <feature>Memory layout optimization</feature>
+            <feature>Multi-dimensional data handling</feature>
+            <feature>Performance analysis for 3D data</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>3D Data Layout</title>
+                <description>Memory organization for 3D arrays</description>
+            </concept>
+            <concept>
+                <title>3D FFT</title>
+                <description>Three-dimensional transform</description>
+            </concept>
+            <concept>
+                <title>Memory Access</title>
+                <description>Optimizing 3D memory access patterns</description>
+            </concept>
+            <concept>
+                <title>Transpose Operations</title>
+                <description>Data rearrangement for FFT</description>
+            </concept>
+        </concepts>
+        <optimizations>
+            <optimization>3D memory coalescing</optimization>
+            <optimization>Shared memory for 3D tiles</optimization>
+            <optimization>Efficient transpose operations</optimization>
+            <optimization>Multi-GPU 3D FFT</optimization>
+        </optimizations>
+    </description>
+</example>

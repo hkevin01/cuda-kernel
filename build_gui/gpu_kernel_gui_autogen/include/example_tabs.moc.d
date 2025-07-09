@@ -1,5 +1,6 @@
 /home/kevin/Projects/cuda-kernel/build_gui/gpu_kernel_gui_autogen/include/example_tabs.moc: /home/kevin/Projects/cuda-kernel/gui/example_tabs.cpp \
   /home/kevin/Projects/cuda-kernel/build_gui/gpu_kernel_gui_autogen/moc_predefs.h \
+  /home/kevin/Projects/cuda-kernel/gui/example_loader.h \
   /home/kevin/Projects/cuda-kernel/gui/example_tabs.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
@@ -318,6 +319,7 @@
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QString \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QTextStream \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/QTimer \
+  /usr/include/x86_64-linux-gnu/qt6/QtCore/QXmlStreamReader \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qalgorithms.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qanystringview.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qarraydata.h \
@@ -420,6 +422,7 @@
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qvariant.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qvarlengtharray.h \
   /usr/include/x86_64-linux-gnu/qt6/QtCore/qversiontagging.h \
+  /usr/include/x86_64-linux-gnu/qt6/QtCore/qxmlstream.h \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QClipboard \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QFont \
   /usr/include/x86_64-linux-gnu/qt6/QtGui/QSyntaxHighlighter \

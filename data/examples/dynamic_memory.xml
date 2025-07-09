@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>Dynamic Memory</name>
+    <category>Advanced</category>
+    <sourceFile>src/08_dynamic_memory/dynamic_memory_hip.hip</sourceFile>
+    <description>
+        <title>Dynamic Memory Management 💾🔄 - Adaptive GPU Applications</title>
+        <overview>
+            This example demonstrates advanced dynamic memory allocation and management on GPU - 
+            essential for applications that don't know their memory requirements at compile time. 
+            Like a smart warehouse manager who allocates storage space on demand, this example 
+            shows how to efficiently allocate, use, and free GPU memory during program execution 
+            without causing memory leaks or fragmentation.
+        </overview>
+        <analogy>
+            <strong>Think of it like this:</strong> Imagine running a library where you don't know 
+            how many books people will bring each day. Instead of reserving huge shelves "just in case," 
+            you dynamically add and remove shelves as needed. GPU dynamic memory works similarly - 
+            allocating exactly what you need, when you need it, and cleaning up efficiently to avoid 
+            running out of space.
+        </analogy>
+        <features>
+            <feature><strong>Runtime Memory Allocation:</strong> Allocate GPU memory based on actual data requirements</feature>
+            <feature><strong>Memory Pool Management:</strong> Efficient allocation strategies to minimize overhead</feature>
+            <feature><strong>Fragmentation Prevention:</strong> Smart allocation patterns to maintain memory efficiency</feature>
+            <feature><strong>Error Handling:</strong> Robust handling of allocation failures and memory exhaustion</feature>
+            <feature><strong>Performance Monitoring:</strong> Track allocation patterns and memory usage statistics</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>Device Memory</title>
+                <description>malloc/free on GPU</description>
+            </concept>
+            <concept>
+                <title>🖥️ GPU Device Memory</title>
+                <description>malloc() and free() operations directly on GPU - runtime memory allocation without CPU involvement</description>
+            </concept>
+            <concept>
+                <title>🏊 Memory Pool Management</title>
+                <description>Pre-allocated pools of memory chunks to minimize allocation overhead and fragmentation</description>
+            </concept>
+            <concept>
+                <title>🧩 Fragmentation Handling</title>
+                <description>Strategies to prevent memory becoming unusably scattered into small, non-contiguous pieces</description>
+            </concept>
+            <concept>
+                <title>⚡ Allocation Performance</title>
+                <description>Understanding the overhead costs and timing considerations of dynamic allocation</description>
+            </concept>
+            <concept>
+                <title>🔒 Thread Safety</title>
+                <description>Ensuring safe memory operations when multiple threads allocate and free memory simultaneously</description>
+            </concept>
+        </concepts>
+        <applications>
+            <application>
+                <title>🧠 Adaptive Machine Learning</title>
+                <description>Neural networks that grow and shrink based on data complexity and training requirements</description>
+            </application>
+            <application>
+                <title>📊 Dynamic Data Structures</title>
+                <description>GPU-based hash tables, trees, and graphs that resize based on input data</description>
+            </application>
+            <application>
+                <title>🎮 Game Engine Systems</title>
+                <description>Runtime object allocation for particles, effects, and dynamic world elements</description>
+            </application>
+            <application>
+                <title>🔬 Scientific Simulations</title>
+                <description>Adaptive mesh refinement and particle systems that change resolution during computation</description>
+            </application>
+            <application>
+                <title>💡 Stream Processing</title>
+                <description>Real-time applications that process varying amounts of data without knowing sizes beforehand</description>
+            </application>
+        </applications>
+        <performance>
+            <consideration>Allocation overhead - dynamic allocation is slower than static, so minimize frequency</consideration>
+            <consideration>Memory fragmentation - use consistent allocation sizes when possible</consideration>
+            <consideration>Thread divergence - avoid having different threads in a warp allocate different amounts</consideration>
+            <consideration>Memory coalescing - ensure allocated memory can still be accessed efficiently</consideration>
+            <consideration>Error recovery - always check allocation success and have fallback strategies</consideration>
+        </performance>
+        <importance>
+            <why>
+                Dynamic memory management is crucial for building flexible, scalable GPU applications. 
+                Many real-world problems don't have fixed memory requirements - data sizes vary, 
+                algorithms adapt, and systems need to respond to changing conditions. Understanding 
+                dynamic GPU memory allocation enables you to build applications that are both 
+                efficient and adaptable to real-world conditions.
+            </why>
+            <performance>
+                Proper dynamic memory management can make the difference between an application 
+                that runs out of memory and one that scales gracefully. While dynamic allocation 
+                has overhead, smart pooling and caching strategies can achieve near-static performance 
+                while maintaining the flexibility needed for modern GPU computing applications.
+            </performance>
+        </importance>
+    </description>
+</example>

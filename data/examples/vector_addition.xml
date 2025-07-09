@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>Vector Addition</name>
+    <category>Basic</category>
+    <sourceFile>src/01_vector_addition/vector_addition.cu</sourceFile>
+    <description>
+        <title>Vector Addition 🧮 - The "Hello World" of GPU Programming</title>
+        <overview>
+            This example demonstrates the fundamental concept of parallel vector addition on GPU - 
+            adding two arrays element by element using thousands of GPU cores simultaneously. 
+            It's like having an army of calculators working together, each adding corresponding 
+            numbers from two lists at the same time.
+        </overview>
+        <analogy>
+            <strong>Think of it like this:</strong> Imagine you have two phone books and need to add 
+            the page numbers. Instead of one person doing it sequentially, you give each page to a 
+            different person - suddenly 1000 people are adding numbers simultaneously!
+        </analogy>
+        <features>
+            <feature><strong>Parallel Processing:</strong> Thousands of GPU cores working simultaneously</feature>
+            <feature><strong>Memory Management:</strong> Efficient data transfer between CPU and GPU</feature>
+            <feature><strong>Performance Measurement:</strong> Compare GPU vs CPU execution times</feature>
+            <feature><strong>Result Verification:</strong> Ensure parallel computation matches sequential results</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>🔧 Memory Management</title>
+                <description>cudaMalloc, cudaMemcpy, cudaFree - the essential trio for GPU memory operations</description>
+            </concept>
+            <concept>
+                <title>🔧 Kernel Launch</title>
+                <description>&lt;&lt;&lt;grid, block&gt;&gt;&gt; syntax - how to tell the GPU "run this code on N threads"</description>
+            </concept>
+            <concept>
+                <title>🔧 Thread Indexing</title>
+                <description>threadIdx, blockIdx, blockDim - each thread knows its unique ID and position</description>
+            </concept>
+            <concept>
+                <title>🔧 Synchronization</title>
+                <description>cudaDeviceSynchronize - wait for all GPU work to complete before proceeding</description>
+            </concept>
+        </concepts>
+        <applications>
+            <application>
+                <title>🚀 Foundation for All GPU Operations</title>
+                <description>Every GPU algorithm builds on these basic parallel principles</description>
+            </application>
+            <application>
+                <title>🚀 Data Processing Pipelines</title>
+                <description>Massive datasets processed in parallel for analytics and machine learning</description>
+            </application>
+            <application>
+                <title>🚀 Scientific Computing</title>
+                <description>Mathematical computations across large arrays in physics and engineering</description>
+            </application>
+        </applications>
+        <performance>
+            <consideration>Memory coalescing - accessing GPU memory efficiently in sequential patterns</consideration>
+            <consideration>Optimal grid and block sizing - balance between parallelism and resource usage</consideration>
+            <consideration>Minimizing CPU-GPU memory transfers - the biggest performance bottleneck</consideration>
+        </performance>
+        <importance>
+            <why>
+                Vector addition is the foundation of GPU programming. Master this, and you understand 
+                how parallel computing works. It's simple enough to grasp quickly but demonstrates 
+                all the core concepts you'll use in complex applications.
+            </why>
+            <performance>
+                A modern GPU can add millions of numbers in the time it takes a CPU to add thousands. 
+                This 100x+ speedup is why GPUs revolutionized machine learning, scientific computing, 
+                and cryptocurrency mining.
+            </performance>
+        </importance>
+    </description>
+</example>

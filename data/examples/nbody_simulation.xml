@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>N-Body Simulation</name>
+    <category>Advanced</category>
+    <sourceFile>src/11_nbody_simulation/nbody_hip.hip</sourceFile>
+    <description>
+        <title>N-Body Simulation 🌌⭐ - Simulating the Universe's Gravitational Dance</title>
+        <overview>
+            This example demonstrates N-body gravitational simulation - modeling the complex interactions 
+            between thousands of celestial bodies like stars, planets, and galaxies. Like watching the 
+            cosmic ballet where every particle influences every other through gravitational forces, 
+            this simulation showcases GPU's incredible power for physics modeling, revealing how 
+            thousands of objects can interact simultaneously in real-time.
+        </overview>
+        <analogy>
+            <strong>Think of it like this:</strong> Imagine a cosmic dance floor with thousands of dancers, 
+            where each dancer is attracted to every other dancer with a force that depends on their 
+            masses and distances. As they move, the gravitational forces constantly change, creating 
+            complex orbital patterns, collisions, and emergent behaviors. With GPU acceleration, 
+            we can simulate this intricate dance with astronomical numbers of particles in real-time.
+        </analogy>
+        <features>
+            <feature><strong>Barnes-Hut Algorithm:</strong> Reduces O(n²) complexity to O(n log n) for massive simulations</feature>
+            <feature><strong>Spatial Partitioning:</strong> Octree data structures for efficient neighbor finding</feature>
+            <feature><strong>Force Optimization:</strong> Shared memory and approximation techniques for performance</feature>
+            <feature><strong>Multi-GPU Scaling:</strong> Distribute massive simulations across multiple GPUs</feature>
+            <feature><strong>Visualization Ready:</strong> Real-time position updates for interactive display</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>N-Body Physics</title>
+                <description>Gravitational force calculations</description>
+            </concept>
+            <concept>
+                <title>🌍 Gravitational Physics</title>
+                <description>Newton's law of gravitation applied to thousands of interacting bodies simultaneously</description>
+            </concept>
+            <concept>
+                <title>🌳 Barnes-Hut Tree Algorithm</title>
+                <description>Hierarchical space subdivision that reduces computational complexity from O(n²) to O(n log n)</description>
+            </concept>
+            <concept>
+                <title>🧊 Octree Spatial Partitioning</title>
+                <description>3D space division into octants for efficient neighbor searches and force approximations</description>
+            </concept>
+            <concept>
+                <title>⚡ Force Approximation</title>
+                <description>Multipole expansion techniques to approximate distant forces while maintaining accuracy</description>
+            </concept>
+            <concept>
+                <title>🔄 Numerical Integration</title>
+                <description>Time-stepping algorithms like Verlet and Runge-Kutta for stable orbital mechanics</description>
+            </concept>
+        </concepts>
+        <applications>
+            <application>
+                <title>🌌 Astrophysics Research</title>
+                <description>Galaxy formation, stellar cluster evolution, and dark matter distribution studies</description>
+            </application>
+            <application>
+                <title>🚀 Space Mission Planning</title>
+                <description>Trajectory optimization, gravitational assists, and multi-body orbital mechanics</description>
+            </application>
+            <application>
+                <title>🧬 Molecular Dynamics</title>
+                <description>Protein folding simulations, drug design, and materials science at the atomic level</description>
+            </application>
+            <application>
+                <title>🎮 Game Physics</title>
+                <description>Realistic particle systems, destruction effects, and large-scale physics simulations</description>
+            </application>
+            <application>
+                <title>🏭 Fluid Dynamics</title>
+                <description>Smoothed particle hydrodynamics for engineering and environmental modeling</description>
+            </application>
+            <application>
+                <title>🔬 Plasma Physics</title>
+                <description>Fusion research, magnetosphere modeling, and high-energy particle interactions</description>
+            </application>
+        </applications>
+        <performance>
+            <consideration>Load balancing - ensure particles are distributed evenly across GPU threads</consideration>
+            <consideration>Memory coalescing - organize particle data for optimal memory access patterns</consideration>
+            <consideration>Tree traversal efficiency - minimize divergent execution paths in spatial queries</consideration>
+            <consideration>Numerical stability - maintain precision in force calculations over long time periods</consideration>
+            <consideration>Scalability - design algorithms that work efficiently from hundreds to millions of particles</consideration>
+        </performance>
+        <importance>
+            <why>
+                N-body simulation is the foundation of computational physics and astronomy. It's how we 
+                understand galaxy formation, design space missions, and study everything from planetary 
+                rings to dark matter. The same techniques apply to molecular dynamics, materials science, 
+                and any system where many objects interact through forces. GPU acceleration has revolutionized 
+                our ability to simulate complex systems that were previously impossible to model.
+            </why>
+            <performance>
+                Modern GPU N-body simulations can handle millions of particles in real-time, enabling 
+                interactive exploration of cosmic phenomena and real-time physics in games and simulations. 
+                What once required supercomputers now runs on desktop GPUs, democratizing access to 
+                sophisticated physics modeling and enabling new discoveries in science and engineering.
+            </performance>
+        </importance>
+    </description>
+</example>

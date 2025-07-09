@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<example>
+    <name>Monte Carlo</name>
+    <category>Basic</category>
+    <sourceFile>src/05_monte_carlo/monte_carlo.cu</sourceFile>
+    <description>
+        <title>Monte Carlo Simulation 🎯🎲 - Statistical Magic with Millions of Random Experiments</title>
+        <overview>
+            This example demonstrates Monte Carlo methods - using random sampling to solve complex 
+            mathematical problems that would be impossible to compute directly. Like throwing millions 
+            of darts at a dartboard to calculate π, or flipping millions of coins to predict market 
+            behavior, Monte Carlo methods harness the power of probability and massive parallelism 
+            to tackle problems in finance, physics, and machine learning.
+        </overview>
+        <analogy>
+            <strong>Think of it like this:</strong> Imagine trying to find the area of an irregularly 
+            shaped lake. Instead of complex mathematics, you throw thousands of pebbles randomly 
+            over the area. By counting how many land in the lake versus on land, you can estimate 
+            the lake's area! GPU Monte Carlo works the same way - millions of "digital pebbles" 
+            (random samples) are thrown simultaneously by different threads, giving incredibly 
+            accurate results through the power of statistics.
+        </analogy>
+        <features>
+            <feature><strong>Massive Random Sampling:</strong> Generate millions of random numbers in parallel using cuRAND</feature>
+            <feature><strong>Statistical Convergence:</strong> Watch accuracy improve as sample size increases</feature>
+            <feature><strong>Multiple Applications:</strong> Calculate π, integrate complex functions, and model uncertainty</feature>
+            <feature><strong>Performance Analysis:</strong> Compare GPU vs CPU for statistical computing workloads</feature>
+            <feature><strong>Quality Assessment:</strong> Analyze randomness quality and convergence properties</feature>
+        </features>
+        <concepts>
+            <concept>
+                <title>Random Number Generation</title>
+                <description>cuRAND library usage</description>
+            </concept>
+            <concept>
+                <title>Monte Carlo Methods</title>
+                <description>Statistical sampling</description>
+            </concept>
+            <concept>
+                <title>🎲 Parallel Random Number Generation</title>
+                <description>cuRAND library generates millions of high-quality random numbers simultaneously across GPU threads</description>
+            </concept>
+            <concept>
+                <title>📊 Statistical Sampling Theory</title>
+                <description>Law of large numbers ensures accuracy improves with more samples - the foundation of Monte Carlo</description>
+            </concept>
+            <concept>
+                <title>🔄 Parallel Reduction</title>
+                <description>Efficiently combining millions of individual sample results into final statistical estimates</description>
+            </concept>
+            <concept>
+                <title>🎯 Convergence Analysis</title>
+                <description>Understanding how quickly and accurately results approach the true value</description>
+            </concept>
+            <concept>
+                <title>⚖️ Numerical Precision</title>
+                <description>Managing floating-point accuracy when accumulating millions of small contributions</description>
+            </concept>
+        </concepts>
+        <applications>
+            <application>
+                <title>💰 Financial Risk Analysis</title>
+                <description>Option pricing, portfolio optimization, and risk assessment for banks and investment firms</description>
+            </application>
+            <application>
+                <title>🌡️ Climate and Weather Modeling</title>
+                <description>Uncertainty quantification in weather prediction and climate change projections</description>
+            </application>
+            <application>
+                <title>🎮 Game AI and Procedural Generation</title>
+                <description>Creating realistic randomness in games, from terrain generation to AI decision-making</description>
+            </application>
+            <application>
+                <title>🧬 Molecular Dynamics</title>
+                <description>Simulating particle interactions in chemistry and materials science research</description>
+            </application>
+            <application>
+                <title>🚀 Engineering Design</title>
+                <description>Uncertainty analysis in aerospace, automotive, and structural engineering projects</description>
+            </application>
+            <application>
+                <title>🔬 Scientific Research</title>
+                <description>Complex integration, Bayesian inference, and hypothesis testing across disciplines</description>
+            </application>
+        </applications>
+        <performance>
+            <consideration>Random number quality - ensure statistical independence and uniform distribution</consideration>
+            <consideration>Convergence rate - more samples give better accuracy but require more computation</consideration>
+            <consideration>Memory access patterns - organize computations to maximize memory throughput</consideration>
+            <consideration>Numerical stability - prevent accumulation of floating-point errors in large sums</consideration>
+            <consideration>Load balancing - ensure all threads perform similar amounts of work</consideration>
+        </performance>
+        <importance>
+            <why>
+                Monte Carlo methods are essential when exact solutions are impossible or impractical. 
+                Many real-world problems - from financial risk to weather prediction to drug design - 
+                involve too many variables for direct calculation. Monte Carlo transforms these 
+                impossible problems into manageable statistical sampling, and GPU acceleration 
+                makes previously impractical computations run in real-time.
+            </why>
+            <performance>
+                GPU Monte Carlo can perform millions of simulations per second, enabling real-time 
+                financial risk assessment, interactive scientific modeling, and complex optimization. 
+                What once took hours on CPUs now completes in seconds, revolutionizing fields that 
+                depend on statistical analysis and uncertainty quantification.
+            </performance>
+        </importance>
+    </description>
+</example>

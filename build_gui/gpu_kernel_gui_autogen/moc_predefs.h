@@ -172,6 +172,7 @@
 #define __ATOMIC_HLE_RELEASE 131072
 #define __PTRDIFF_MAX__ 0x7fffffffffffffffL
 #define __amd64 1
+#define QT_XML_LIB 1
 #define __ATOMIC_HLE_ACQUIRE 65536
 #define __GNUG__ 13
 #define __LONG_LONG_MAX__ 0x7fffffffffffffffLL

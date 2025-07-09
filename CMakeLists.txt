@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find required packages
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Xml)
 find_package(HIP REQUIRED)
 
 # Set output directories
@@ -52,6 +52,7 @@ set(GUI_SOURCES
     gui/result_viewer.cpp
     gui/test_runner.cpp
     gui/example_tabs.cpp
+    gui/example_loader.cpp
     gui/resources.qrc
 )
 
@@ -62,6 +63,7 @@ add_executable(gpu_kernel_gui ${GUI_SOURCES})
 target_link_libraries(gpu_kernel_gui 
     Qt6::Core 
     Qt6::Widgets
+    Qt6::Xml
 )
 
 # Set GUI properties
