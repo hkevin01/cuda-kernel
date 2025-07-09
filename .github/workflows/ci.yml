@@ -1,0 +1,32 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake build-essential qt6-base-dev qt6-tools-dev libqt6xml6-dev
+    
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_GUI=ON
+    
+    - name: Build
+      run: cmake --build build --parallel $(nproc)
+    
+    - name: Test XML Loading
+      run: |
+        if [ -f "test_enhancements.sh" ]; then
+          chmod +x test_enhancements.sh
+          ./test_enhancements.sh
+        fi

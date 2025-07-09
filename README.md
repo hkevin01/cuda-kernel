@@ -1,7 +1,9 @@
-[![Build](https://img.shields.io/github/actions/workflow/status/your-org/cuda-kernel/ci.yml?branch=main&logo=github)](https://github.com/your-org/cuda-kernel/actions)
-[![License](https://img.shields.io/github/license/your-org/cuda-kernel?color=blue)](LICENSE)
+[![Build](https://img.shields.io/github/actions/workflow/status/hkevin01/cuda-kernel/ci.yml?branch=main&logo=github)](https://github.com/hkevin01/cuda-kernel/actions)
+[![License](https://img.shields.io/github/license/hkevin01/cuda-kernel?color=blue)](LICENSE)
 [![Platform](https://img.shields.io/badge/GPU-NVIDIA%20%7C%20AMD-green?logo=nvidia&logoColor=white)](#)
 [![Educational](https://img.shields.io/badge/Focus-Education%20%26%20Demos-blueviolet?logo=academia)](#)
+[![Language](https://img.shields.io/badge/Language-C%2B%2B%20%7C%20CUDA%20%7C%20HIP-orange?logo=cplusplus)](#)
+[![GUI](https://img.shields.io/badge/GUI-Qt6-green?logo=qt)](#)
 
 # GPU Kernel Project 🚀
 
