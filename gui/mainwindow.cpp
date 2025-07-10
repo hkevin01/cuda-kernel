@@ -127,11 +127,6 @@ void MainWindow::createActions()
     connect(m_runKernelAct, &QAction::triggered, this, [this]()
             { m_kernelRunner->runSelectedKernel(); });
 
-    m_runTestsAct = new QAction(tr("Run &Tests"), this);
-    m_runTestsAct->setStatusTip(tr("Run all tests"));
-    connect(m_runTestsAct, &QAction::triggered, this, [this]()
-            { m_testRunner->runAllTests(); });
-
     m_showPerformanceAct = new QAction(tr("&Performance"), this);
     m_showPerformanceAct->setStatusTip(tr("Show performance metrics"));
     connect(m_showPerformanceAct, &QAction::triggered, this, [this]()
@@ -195,7 +190,6 @@ void MainWindow::createToolBars()
     m_kernelToolBar = addToolBar(tr("Kernel"));
     m_kernelToolBar->setObjectName("kernelToolBar");
     m_kernelToolBar->addAction(m_runKernelAct);
-    m_kernelToolBar->addAction(m_runTestsAct);
     m_kernelToolBar->addSeparator();
     m_kernelToolBar->addAction(m_showPerformanceAct);
 }
@@ -252,8 +246,6 @@ void MainWindow::setupConnections()
             this, &MainWindow::onKernelFinished);
     connect(m_kernelRunner, &KernelRunner::progressUpdated,
             this, &MainWindow::updateProgress);
-    connect(m_testRunner, &TestRunner::progressUpdated,
-            this, &MainWindow::updateProgress);
 
     // Connect performance widget signals
     connect(m_performanceWidget, &PerformanceWidget::dataUpdated,
@@ -304,7 +296,7 @@ void MainWindow::about()
 {
     QMessageBox::about(this, tr("About GPU Kernel Examples"),
                        tr("<b>GPU Kernel Examples</b> is a comprehensive collection of "
-                          "CUDA and HIP kernel examples with testing and performance analysis tools.<br><br>"
+                          "CUDA and HIP kernel examples with educational descriptions and performance analysis tools.<br><br>"
                           "Version: 1.0.0<br>"
                           "Platform: %1<br>"
                           "Built with Qt %2")

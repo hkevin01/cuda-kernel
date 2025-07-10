@@ -92,7 +92,6 @@ private:
     QAction *m_aboutAct;
     QAction *m_aboutQtAct;
     QAction *m_runKernelAct;
-    QAction *m_runTestsAct;
     QAction *m_showPerformanceAct;
     QAction *m_toggleSystemTrayAct;
 

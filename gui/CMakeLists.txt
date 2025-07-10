@@ -33,8 +33,6 @@ add_executable(gpu_kernel_gui
     result_viewer.h
     performance_widget.cpp
     performance_widget.h
-    test_runner.cpp
-    test_runner.h
     example_tabs.cpp
     example_tabs.h
     example_loader.cpp
