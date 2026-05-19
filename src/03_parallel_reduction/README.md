@@ -80,12 +80,12 @@ for (int offset = warpSize / 2; offset > 0; offset /= 2) {
 ## Performance Characteristics
 
 ### Expected Results
-| Implementation | Relative Performance | Key Features |
+| <sub>Implementation</sub> | <sub>Relative Performance</sub> | <sub>Key Features</sub> |
 |---------------|---------------------|--------------|
-| Naive | 1.0x (baseline) | High divergence, poor efficiency |
-| Optimized | 2-3x | No divergence, coalesced access |
-| Warp Optimized | 4-6x | Unrolled warps, reduced sync |
-| Cooperative Groups | 5-8x | Shuffle instructions, minimal overhead |
+| <sub>Naive</sub> | <sub>1.0x (baseline)</sub> | <sub>High divergence, poor efficiency</sub> |
+| <sub>Optimized</sub> | <sub>2-3x</sub> | <sub>No divergence, coalesced access</sub> |
+| <sub>Warp Optimized</sub> | <sub>4-6x</sub> | <sub>Unrolled warps, reduced sync</sub> |
+| <sub>Cooperative Groups</sub> | <sub>5-8x</sub> | <sub>Shuffle instructions, minimal overhead</sub> |
 
 ### Memory Bandwidth Analysis
 - **Input**: Each element read once
