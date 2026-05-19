@@ -90,13 +90,13 @@ sum += tex2D<float>(texObj, img_col, img_row) * kernel[k];
 ## Performance Characteristics
 
 ### Expected Results (RTX 3080, 1024x1024 image, 5x5 kernel)
-| Implementation | Time (ms) | Bandwidth (GB/s) | Speedup |
+| <sub>Implementation</sub> | <sub>Time (ms)</sub> | <sub>Bandwidth (GB/s)</sub> | <sub>Speedup</sub> |
 |---------------|-----------|------------------|---------|
-| CPU Reference | 1200.0 | 1.7 | 1.0x |
-| Naive GPU | 15.2 | 134.5 | 78.9x |
-| Shared Memory | 8.7 | 234.8 | 137.9x |
-| Constant Memory | 7.1 | 287.3 | 169.0x |
-| Texture Memory | 6.8 | 300.1 | 176.5x |
+| <sub>CPU Reference</sub> | <sub>1200.0</sub> | <sub>1.7</sub> | <sub>1.0x</sub> |
+| <sub>Naive GPU</sub> | <sub>15.2</sub> | <sub>134.5</sub> | <sub>78.9x</sub> |
+| <sub>Shared Memory</sub> | <sub>8.7</sub> | <sub>234.8</sub> | <sub>137.9x</sub> |
+| <sub>Constant Memory</sub> | <sub>7.1</sub> | <sub>287.3</sub> | <sub>169.0x</sub> |
+| <sub>Texture Memory</sub> | <sub>6.8</sub> | <sub>300.1</sub> | <sub>176.5x</sub> |
 
 ### Memory Efficiency Analysis
 - **Theoretical Peak**: ~936 GB/s (RTX 3080)
